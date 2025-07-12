@@ -68,7 +68,7 @@ def save_interview_data(
 ):
     """Write interview data (transcript and time) to disk."""
 
-    # Store chat transcript
+    '''# Store chat transcript
     with open(
         os.path.join(
             transcripts_directory, f"{username}{file_name_addition_transcript}.txt"
@@ -86,4 +86,5 @@ def save_interview_data(
         duration = (time.time() - st.session_state.start_time) / 60
         d.write(
             f"Start time (UTC): {time.strftime('%d/%m/%Y %H:%M:%S', time.localtime(st.session_state.start_time))}\nInterview duration (minutes): {duration:.2f}"
-        )
+        )'''
+    pass
