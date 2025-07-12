@@ -2,8 +2,7 @@ import streamlit as st
 import time
 from utils import (
     check_password,
-    check_if_interview_completed,
-    save_interview_data,
+    check_if_interview_completed
 )
 import os
 import config
@@ -35,13 +34,6 @@ if config.LOGINS:
 else:
     st.session_state.username = "testaccount"
 
-# Create directories if they do not already exist
-'''if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
-    os.makedirs(config.TRANSCRIPTS_DIRECTORY)
-if not os.path.exists(config.TIMES_DIRECTORY):
-    os.makedirs(config.TIMES_DIRECTORY)
-if not os.path.exists(config.BACKUPS_DIRECTORY):
-    os.makedirs(config.BACKUPS_DIRECTORY)'''
 
 
 # Initialise session state
@@ -59,18 +51,6 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-'''# Check if interview previously completed
-interview_previously_completed = check_if_interview_completed(
-    config.TIMES_DIRECTORY, st.session_state.username
-)'''
-
-'''# If app started but interview was previously completed
-if interview_previously_completed and not st.session_state.messages:
-
-    st.session_state.interview_active = False
-    completed_message = "Interview already completed."
-    st.markdown(completed_message)'''
-
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
 # Place where the second column is
@@ -85,11 +65,6 @@ with col2:
         st.session_state.interview_active = False
         quit_message = "You have cancelled the interview."
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
-        '''save_interview_data(
-            st.session_state.username,
-            config.TRANSCRIPTS_DIRECTORY,
-            config.TIMES_DIRECTORY,
-        )'''
 
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
@@ -149,14 +124,6 @@ if not st.session_state.messages:
         {"role": "assistant", "content": message_interviewer}
     )
 
-    # Store first backup files to record who started the interview
-    '''save_interview_data(
-        username=st.session_state.username,
-        transcripts_directory=config.BACKUPS_DIRECTORY,
-        times_directory=config.BACKUPS_DIRECTORY,
-        file_name_addition_transcript=f"_transcript_started_{st.session_state.start_time_file_names}",
-        file_name_addition_time=f"_time_started_{st.session_state.start_time_file_names}",
-    )'''
 
 
 # Main chat if interview is active
@@ -229,21 +196,6 @@ if st.session_state.interview_active:
                     {"role": "assistant", "content": message_interviewer}
                 )
 
-                # Regularly store interview progress as backup, but prevent script from
-                # stopping in case of a write error
-                try:
-
-                    '''save_interview_data(
-                        username=st.session_state.username,
-                        transcripts_directory=config.BACKUPS_DIRECTORY,
-                        times_directory=config.BACKUPS_DIRECTORY,
-                        file_name_addition_transcript=f"_transcript_started_{st.session_state.start_time_file_names}",
-                        file_name_addition_time=f"_time_started_{st.session_state.start_time_file_names}",
-                    )'''
-
-                except:
-
-                    pass
 
             # If code in the message, display the associated closing message instead
             # Loop over all codes
@@ -262,18 +214,3 @@ if st.session_state.interview_active:
                     st.session_state.messages.append(
                         {"role": "assistant", "content": closing_message}
                     )
-
-                    '''# Store final transcript and time
-                    final_transcript_stored = False
-                    while final_transcript_stored == False:
-
-                        save_interview_data(
-                            username=st.session_state.username,
-                            transcripts_directory=config.TRANSCRIPTS_DIRECTORY,
-                            times_directory=config.TIMES_DIRECTORY,
-                        )
-
-                        final_transcript_stored = check_if_interview_completed(
-                            config.TRANSCRIPTS_DIRECTORY, st.session_state.username
-                        )
-                        time.sleep(0.1)'''
