@@ -86,12 +86,7 @@ MAX_OUTPUT_TOKENS = 2048
 LOGINS = False
 
 
-# Directories
-TRANSCRIPTS_DIRECTORY = "/Users/malank/Documents/survey/data/transcripts/"
-TIMES_DIRECTORY = "/Users/malank/Documents/survey/data/times/"
-BACKUPS_DIRECTORY = "/Users/malank/Documents/survey/data/backups"
-
 
 # Avatars displayed in the chat interface
 AVATAR_INTERVIEWER = "\U0001F393"
-AVATAR_RESPONDENT = "\U0001F9D1\U0000200D\U0001F4BB"
+AVATAR_RESPONDENT = "\U0001f464"

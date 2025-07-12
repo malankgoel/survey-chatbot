@@ -1,8 +1,7 @@
 import streamlit as st
 import time
 from utils import (
-    check_password,
-    check_if_interview_completed
+    check_password
 )
 import os
 import config
@@ -11,14 +10,6 @@ import config
 if "gpt" in config.MODEL.lower():
     api = "openai"
     from openai import OpenAI
-
-elif "claude" in config.MODEL.lower():
-    api = "anthropic"
-    import anthropic
-else:
-    raise ValueError(
-        "Model does not contain 'gpt' or 'claude'; unable to determine API."
-    )
 
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
@@ -167,24 +158,6 @@ if st.session_state.interview_active:
                         # Stop displaying the progress of the message in case of a code
                         message_placeholder.empty()
                         break
-
-            elif api == "anthropic":
-
-                # Stream responses
-                with client.messages.stream(**api_kwargs) as stream:
-                    for text_delta in stream.text_stream:
-                        if text_delta != None:
-                            message_interviewer += text_delta
-                        # Start displaying message only after 5 characters to first check for codes
-                        if len(message_interviewer) > 5:
-                            message_placeholder.markdown(message_interviewer + "▌")
-                        if any(
-                            code in message_interviewer
-                            for code in config.CLOSING_MESSAGES.keys()
-                        ):
-                            # Stop displaying the progress of the message in case of a code
-                            message_placeholder.empty()
-                            break
 
             # If no code is in the message, display and store the message
             if not any(
