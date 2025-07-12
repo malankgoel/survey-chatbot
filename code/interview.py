@@ -36,15 +36,15 @@ else:
     st.session_state.username = "testaccount"
 
 # Create directories if they do not already exist
-if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
+'''if not os.path.exists(config.TRANSCRIPTS_DIRECTORY):
     os.makedirs(config.TRANSCRIPTS_DIRECTORY)
 if not os.path.exists(config.TIMES_DIRECTORY):
     os.makedirs(config.TIMES_DIRECTORY)
 if not os.path.exists(config.BACKUPS_DIRECTORY):
-    os.makedirs(config.BACKUPS_DIRECTORY)
+    os.makedirs(config.BACKUPS_DIRECTORY)'''
 
 
-# Initialise session state
+'''# Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
 
@@ -62,9 +62,9 @@ if "start_time" not in st.session_state:
 # Check if interview previously completed
 interview_previously_completed = check_if_interview_completed(
     config.TIMES_DIRECTORY, st.session_state.username
-)
+)'''
 
-# If app started but interview was previously completed
+'''# If app started but interview was previously completed
 if interview_previously_completed and not st.session_state.messages:
 
     st.session_state.interview_active = False
@@ -90,7 +90,7 @@ with col2:
             config.TRANSCRIPTS_DIRECTORY,
             config.TIMES_DIRECTORY,
         )
-
+'''
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
