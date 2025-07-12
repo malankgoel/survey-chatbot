@@ -44,7 +44,7 @@ if not os.path.exists(config.BACKUPS_DIRECTORY):
     os.makedirs(config.BACKUPS_DIRECTORY)'''
 
 
-'''# Initialise session state
+# Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
 
@@ -59,7 +59,7 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-# Check if interview previously completed
+'''# Check if interview previously completed
 interview_previously_completed = check_if_interview_completed(
     config.TIMES_DIRECTORY, st.session_state.username
 )'''
@@ -69,7 +69,7 @@ if interview_previously_completed and not st.session_state.messages:
 
     st.session_state.interview_active = False
     completed_message = "Interview already completed."
-    st.markdown(completed_message)
+    st.markdown(completed_message)'''
 
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
@@ -85,12 +85,12 @@ with col2:
         st.session_state.interview_active = False
         quit_message = "You have cancelled the interview."
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
-        save_interview_data(
+        '''save_interview_data(
             st.session_state.username,
             config.TRANSCRIPTS_DIRECTORY,
             config.TIMES_DIRECTORY,
-        )
-'''
+        )'''
+
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
