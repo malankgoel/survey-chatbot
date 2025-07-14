@@ -44,7 +44,7 @@ with col2:
         "Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
         )
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
-
+        st.warning(quit_message)
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
