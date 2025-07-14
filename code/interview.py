@@ -40,7 +40,7 @@ with col2:
         # Set interview to inactive, display quit message, and store data
         st.session_state.interview_active = False
         quit_message = (
-        "You have ended the interview." 
+        "You have ended the interview.\n" 
         "Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
         )
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
@@ -140,22 +140,3 @@ if st.session_state.interview_active:
                 st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
                 )
-
-
-            # If code in the message, display the associated closing message instead
-            # Loop over all codes
-            for code in config.CLOSING_MESSAGES.keys():
-
-                if code in message_interviewer:
-                    # Store message in list of messages
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": message_interviewer}
-                    )
-
-                    # Set chat to inactive and display closing message
-                    st.session_state.interview_active = False
-                    closing_message = config.CLOSING_MESSAGES[code]
-                    st.markdown(closing_message)
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": closing_message}
-                    )
