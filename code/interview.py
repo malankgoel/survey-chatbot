@@ -1,9 +1,5 @@
 import streamlit as st
 import time
-from utils import (
-    check_password
-)
-import os
 import config
 
 
@@ -40,7 +36,7 @@ with col2:
         # Set interview to inactive, display quit message, and store data
         st.session_state.interview_active = False
         quit_message = (
-        "You have ended the interview.\n" 
+        "You have ended the interview.\n"
         "Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
         )
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
@@ -48,15 +44,9 @@ with col2:
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
-
-    if message["role"] == "assistant":
-        avatar = config.AVATAR_INTERVIEWER
-    else:
-        avatar = config.AVATAR_RESPONDENT
-    # Only display messages without codes
-    if not any(code in message["content"] for code in config.CLOSING_MESSAGES.keys()):
-        with st.chat_message(message["role"], avatar=avatar):
-            st.markdown(message["content"])
+    avatar = config.AVATAR_INTERVIEWER if message["role"]=="assistant" else config.AVATAR_RESPONDENT
+    with st.chat_message(message["role"], avatar=avatar):
+        st.markdown(message["content"])
 
 # Load API client
 if api == "openai":
@@ -120,23 +110,11 @@ if st.session_state.interview_active:
                     text_delta = message.choices[0].delta.content
                     if text_delta != None:
                         message_interviewer += text_delta
-                    # Start displaying message only after 5 characters to first check for codes
-                    if len(message_interviewer) > 5:
-                        message_placeholder.markdown(message_interviewer + "▌")
-                    if any(
-                        code in message_interviewer
-                        for code in config.CLOSING_MESSAGES.keys()
-                    ):
-                        # Stop displaying the progress of the message in case of a code
-                        message_placeholder.empty()
-                        break
+                    
+                    message_placeholder.markdown(message_interviewer + "▌")
 
-            # If no code is in the message, display and store the message
-            if not any(
-                code in message_interviewer for code in config.CLOSING_MESSAGES.keys()
-            ):
-
-                message_placeholder.markdown(message_interviewer)
-                st.session_state.messages.append(
+            # Display and store the message
+            message_placeholder.markdown(message_interviewer)
+            st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
-                )
+            )
