@@ -12,6 +12,12 @@ if "gpt" in config.MODEL.lower():
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
 
+patient_id = st.text_input("Enter Patient ID:", key="patient_id")
+if not patient_id:
+    st.warning("Please enter a Patient ID to proceed.")
+    st.stop()
+st.session_state.patient_id = patient_id
+
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
