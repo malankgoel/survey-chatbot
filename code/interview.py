@@ -11,14 +11,6 @@ if "gpt" in config.MODEL.lower():
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
-
-patient_id = st.text_input("Enter Patient ID:", key="patient_id")
-if not patient_id:
-    st.session_state.patient_id = []
-    st.warning("Please enter a Patient ID to proceed.")
-    st.stop()
-st.session_state.patient_id.append(patient_id) 
-
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
@@ -33,6 +25,19 @@ if "start_time" not in st.session_state:
     st.session_state.start_time_file_names = time.strftime(
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
+
+# PROMPT FOR PATIENT ID
+if "patient_id" not in st.session_state:
+    st.session_state.patient_id = ""
+
+st.session_state.patient_id = st.text_input(
+    "Enter Patient ID:", 
+    value=st.session_state.patient_id
+)
+if not st.session_state.patient_id:
+    st.warning("Please enter a Patient ID to proceed.")
+    st.stop()
+
 
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
