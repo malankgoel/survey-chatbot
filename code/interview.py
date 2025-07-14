@@ -102,14 +102,14 @@ if st.session_state.interview_active:
 
     # Chat input and message for respondent
     if message_respondent := st.chat_input("Your message here"):
-         # ─── INSERT COMMAND HANDLER HERE ───
+
         if message_respondent.lower() == "new":
             # reset back to the system prompt
             st.session_state.messages = [
                 {"role": "system", "content": config.SYSTEM_PROMPT}
             ]
             st.success("🔄 Started a new session.")
-            st.experimental_rerun()
+            st.stop()  
 
         '''elif message_respondent.lower() == "store":
             # find last assistant reply
