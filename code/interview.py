@@ -31,6 +31,19 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
+# Add 'Quit' button to dashboard
+col1, col2 = st.columns([0.85, 0.15])
+with col2:
+    # If interview is active and 'Quit' button is clicked
+    if st.session_state.interview_active and st.button(
+        "End", help="End the interview."
+    ):
+
+        # Set interview to inactive, display quit message, and store data
+        st.session_state.interview_active = False
+        quit_message = "You have ended the interview. Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
+        st.session_state.messages.append({"role": "assistant", "content": quit_message})
+
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
@@ -77,18 +90,9 @@ if not st.session_state.messages:
 
 # Main chat if interview is active
 if st.session_state.interview_active:
-    # lay out the bottom row: 80% chat_input, 20% Quit button
-    col1, col2 = st.columns([0.8, 0.2], gap="small")
-    with col1:
-        message_respondent = st.chat_input("Your message here", key="chat_input")
-    with col2:
-        if st.button("🚪 Quit", key="quit_btn", help="End the interview."):
-            st.session_state.interview_active = False
-            quit_message = "You have cancelled the interview."
-            st.session_state.messages.append({"role": "assistant", "content": quit_message})
 
     # Chat input and message for respondent
-    if st.session_state.interview_active and message_respondent:
+    if message_respondent := st.chat_input("Your message here"):
         st.session_state.messages.append(
             {"role": "user", "content": message_respondent}
         )
