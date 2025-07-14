@@ -15,17 +15,17 @@ if "gpt" in config.MODEL.lower():
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
-# Check if usernames and logins are enabled
-if config.LOGINS:
-    # Check password (displays login screen)
-    pwd_correct, username = check_password()
-    if not pwd_correct:
-        st.stop()
-    else:
-        st.session_state.username = username
-else:
-    st.session_state.username = "testaccount"
 
+if "patient_id" not in st.session_state:
+    st.session_state.patient_id = ""
+
+if not st.session_state.patient_id:
+    pid = st.text_input("Please enter the Patient ID:", key="pid_input")
+    if pid:
+        st.session_state.patient_id = pid
+        # worksheet.append_row([pid])
+        st.experimental_rerun()
+    st.stop()
 
 
 # Initialise session state
@@ -35,19 +35,6 @@ if "interview_active" not in st.session_state:
 # Initialise messages list in session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
-# Track Patient ID
-if "patient_id" not in st.session_state:
-    st.session_state.patient_id = None
-
-# If we don’t have an ID yet, ask for it
-if st.session_state.patient_id is None:
-    pid = st.text_input("Please enter the Patient ID:", key="pid_input")
-    if pid:
-        st.session_state.patient_id = pid
-        #worksheet.append_row([pid])
-        st.experimental_rerun()
-    st.stop()
 
 
 # Add 'Quit' button to dashboard
