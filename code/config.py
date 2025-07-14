@@ -68,11 +68,11 @@ Clarity: Keep reasoning and the final summary concise—one short paragraph per
   disease."""
 
 
+Test = "Just print Test"
 # System prompt
-SYSTEM_PROMPT = f"""{INTERVIEW_OUTLINE}
+SYSTEM_PROMPT = f"""{Test}"""
 
-{GENERAL_INSTRUCTIONS}
-"""
+#{GENERAL_INSTRUCTIONS}
 
 
 # API parameters
