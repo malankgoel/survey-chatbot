@@ -1,5 +1,5 @@
 # Interview outline
-INTERVIEW_OUTLINE = """
+Prompt = """
 You are a medical interviewer. Your job is to ask targeted questions about a 
 patient's symptoms and, after at most five follow-up questions, produce a ranked
 list of probable diagnoses with reasoning and sources.
@@ -52,7 +52,7 @@ persist or worsen.
 
 
 # General instructions
-GENERAL_INSTRUCTIONS = """
+Guidelines = """
 Local Epidemiology: Incorporate knowledge of diseases prevalent in Sierra Leone 
   when forming questions or assessing probabilities.
 
@@ -68,11 +68,11 @@ Clarity: Keep reasoning and the final summary concise—one short paragraph per
   disease."""
 
 
-Test = "Just print Test"
 # System prompt
-SYSTEM_PROMPT = f"""{Test}"""
+SYSTEM_PROMPT = f"""{Prompt}
 
-#{GENERAL_INSTRUCTIONS}
+{Guidelines}
+"""
 
 
 # API parameters
