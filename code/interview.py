@@ -15,18 +15,6 @@ if "gpt" in config.MODEL.lower():
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
-# Check if usernames and logins are enabled
-if config.LOGINS:
-    # Check password (displays login screen)
-    pwd_correct, username = check_password()
-    if not pwd_correct:
-        st.stop()
-    else:
-        st.session_state.username = username
-else:
-    st.session_state.username = "testaccount"
-
-
 
 # Initialise session state
 if "interview_active" not in st.session_state:
@@ -75,9 +63,6 @@ for message in st.session_state.messages[1:]:
 if api == "openai":
     client = OpenAI(api_key=st.secrets["API_KEY_OPENAI"])
     api_kwargs = {"stream": True}
-elif api == "anthropic":
-    client = anthropic.Anthropic(api_key=st.secrets["API_KEY_ANTHROPIC"])
-    api_kwargs = {"system": config.SYSTEM_PROMPT}
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
@@ -98,19 +83,6 @@ if not st.session_state.messages:
         with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
             stream = client.chat.completions.create(**api_kwargs)
             message_interviewer = st.write_stream(stream)
-
-    elif api == "anthropic":
-
-        st.session_state.messages.append({"role": "user", "content": "Hi"})
-        with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-            message_placeholder = st.empty()
-            message_interviewer = ""
-            with client.messages.stream(**api_kwargs) as stream:
-                for text_delta in stream.text_stream:
-                    if text_delta != None:
-                        message_interviewer += text_delta
-                    message_placeholder.markdown(message_interviewer + "▌")
-            message_placeholder.markdown(message_interviewer)
 
     st.session_state.messages.append(
         {"role": "assistant", "content": message_interviewer}
