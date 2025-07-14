@@ -16,16 +16,21 @@ if "gpt" in config.MODEL.lower():
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
 
+# ── Patient ID gating (put this right after set_page_config) ──
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = None
 
-if not st.session_state.patient_id:
-    pid = st.text_input("Please enter the Patient ID:", key="pid_input")
-    if pid:
-        st.session_state.patient_id = pid
-        # worksheet.append_row([pid])
-        st.experimental_rerun()
+# show the input box every time, Streamlit will auto-rerun when it changes
+pid = st.text_input("Please enter the Patient ID:", key="pid_input")
+
+# once they type something in, lock it in
+if pid and st.session_state.patient_id is None:
+    st.session_state.patient_id = pid
+
+# until we have a real ID, stop here
+if st.session_state.patient_id is None:
     st.stop()
+
 
 
 # Initialise session state
