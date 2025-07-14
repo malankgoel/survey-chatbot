@@ -31,13 +31,6 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-with st.sidebar:
-    st.markdown("## Controls")
-    if st.session_state.interview_active and st.button("🚪 Quit", help="End the interview."):
-        st.session_state.interview_active = False
-        quit_message = "You have cancelled the interview."
-        st.session_state.messages.append({"role": "assistant", "content": quit_message})
-
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
@@ -84,9 +77,18 @@ if not st.session_state.messages:
 
 # Main chat if interview is active
 if st.session_state.interview_active:
+    # lay out the bottom row: 80% chat_input, 20% Quit button
+    col1, col2 = st.columns([0.8, 0.2], gap="small")
+    with col1:
+        message_respondent = st.chat_input("Your message here", key="chat_input")
+    with col2:
+        if st.button("🚪 Quit", key="quit_btn", help="End the interview."):
+            st.session_state.interview_active = False
+            quit_message = "You have cancelled the interview."
+            st.session_state.messages.append({"role": "assistant", "content": quit_message})
 
     # Chat input and message for respondent
-    if message_respondent := st.chat_input("Your message here"):
+    if st.session_state.interview_active and message_respondent:
         st.session_state.messages.append(
             {"role": "user", "content": message_respondent}
         )
