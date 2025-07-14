@@ -36,13 +36,15 @@ col1, col2 = st.columns([0.85, 0.15])
 with col2:
     # If interview is active and 'Quit' button is clicked
     if st.session_state.interview_active and st.button(
-        "End", help="End the interview."
-    ):
-
+        "End", help="End the interview."):
         # Set interview to inactive, display quit message, and store data
         st.session_state.interview_active = False
-        quit_message = "You have ended the interview. Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
+        quit_message = (
+        "You have ended the interview." 
+        "Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
+        )
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
+        st.warning(quit_message)
 
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
