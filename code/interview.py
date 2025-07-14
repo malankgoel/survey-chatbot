@@ -31,17 +31,9 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-# Add 'Quit' button to dashboard
-col1, col2 = st.columns([0.85, 0.15])
-# Place where the second column is
-with col2:
-
-    # If interview is active and 'Quit' button is clicked
-    if st.session_state.interview_active and st.button(
-        "Quit", help="End the interview."
-    ):
-
-        # Set interview to inactive, display quit message, and store data
+with st.sidebar:
+    st.markdown("## Controls")
+    if st.session_state.interview_active and st.button("🚪 Quit", help="End the interview."):
         st.session_state.interview_active = False
         quit_message = "You have cancelled the interview."
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
