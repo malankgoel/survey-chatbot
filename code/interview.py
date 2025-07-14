@@ -17,7 +17,7 @@ st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
 
 if "patient_id" not in st.session_state:
-    st.session_state.patient_id = ""
+    st.session_state.patient_id = None
 
 if not st.session_state.patient_id:
     pid = st.text_input("Please enter the Patient ID:", key="pid_input")
