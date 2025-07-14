@@ -16,23 +16,6 @@ if "gpt" in config.MODEL.lower():
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
 
-# ── Patient ID gating (put this right after set_page_config) ──
-if "patient_id" not in st.session_state:
-    st.session_state.patient_id = None
-
-# show the input box every time, Streamlit will auto-rerun when it changes
-pid = st.text_input("Please enter the Patient ID:", key="pid_input")
-
-# once they type something in, lock it in
-if pid and st.session_state.patient_id is None:
-    st.session_state.patient_id = pid
-
-# until we have a real ID, stop here
-if st.session_state.patient_id is None:
-    st.stop()
-
-
-
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
@@ -102,31 +85,6 @@ if st.session_state.interview_active:
 
     # Chat input and message for respondent
     if message_respondent := st.chat_input("Your message here"):
-
-        if message_respondent.lower() == "new":
-            # reset back to the system prompt
-            st.session_state.messages = [
-                {"role": "system", "content": config.SYSTEM_PROMPT}
-            ]
-            st.success("🔄 Started a new session.")
-            st.stop()  
-
-        '''elif message_respondent.lower() == "store":
-            # find last assistant reply
-            last = next(
-                (m for m in reversed(st.session_state.messages)
-                 if m["role"] == "assistant"),
-                None
-            )
-            if last:
-                worksheet.append_row([
-                    st.session_state.patient_id,
-                    last["content"]
-                ])
-                st.success("💾 Stored last GPT response.")
-            else:
-                st.warning("No GPT response found to store.")
-            # skip the normal chat flow'''
 
         st.session_state.messages.append(
             {"role": "user", "content": message_respondent}
