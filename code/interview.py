@@ -6,6 +6,7 @@ from utils import (
 import os
 import config
 
+
 # Load API library
 if "gpt" in config.MODEL.lower():
     api = "openai"
@@ -35,12 +36,19 @@ if "interview_active" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Store start time in session state
-if "start_time" not in st.session_state:
-    st.session_state.start_time = time.time()
-    st.session_state.start_time_file_names = time.strftime(
-        "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
-    )
+# Track Patient ID
+if "patient_id" not in st.session_state:
+    st.session_state.patient_id = None
+
+# If we don’t have an ID yet, ask for it
+if st.session_state.patient_id is None:
+    pid = st.text_input("Please enter the Patient ID:", key="pid_input")
+    if pid:
+        st.session_state.patient_id = pid
+        #worksheet.append_row([pid])
+        st.experimental_rerun()
+    st.stop()
+
 
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
@@ -74,9 +82,6 @@ for message in st.session_state.messages[1:]:
 if api == "openai":
     client = OpenAI(api_key=st.secrets["API_KEY_OPENAI"])
     api_kwargs = {"stream": True}
-elif api == "anthropic":
-    client = anthropic.Anthropic(api_key=st.secrets["API_KEY_ANTHROPIC"])
-    api_kwargs = {"system": config.SYSTEM_PROMPT}
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
@@ -98,23 +103,6 @@ if not st.session_state.messages:
             stream = client.chat.completions.create(**api_kwargs)
             message_interviewer = st.write_stream(stream)
 
-    elif api == "anthropic":
-
-        st.session_state.messages.append({"role": "user", "content": "Hi"})
-        with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-            message_placeholder = st.empty()
-            message_interviewer = ""
-            with client.messages.stream(**api_kwargs) as stream:
-                for text_delta in stream.text_stream:
-                    if text_delta != None:
-                        message_interviewer += text_delta
-                    message_placeholder.markdown(message_interviewer + "▌")
-            message_placeholder.markdown(message_interviewer)
-
-    st.session_state.messages.append(
-        {"role": "assistant", "content": message_interviewer}
-    )
-
 
 
 # Main chat if interview is active
@@ -122,6 +110,32 @@ if st.session_state.interview_active:
 
     # Chat input and message for respondent
     if message_respondent := st.chat_input("Your message here"):
+         # ─── INSERT COMMAND HANDLER HERE ───
+        if message_respondent.lower() == "new":
+            # reset back to the system prompt
+            st.session_state.messages = [
+                {"role": "system", "content": config.SYSTEM_PROMPT}
+            ]
+            st.success("🔄 Started a new session.")
+            st.experimental_rerun()
+
+        '''elif message_respondent.lower() == "store":
+            # find last assistant reply
+            last = next(
+                (m for m in reversed(st.session_state.messages)
+                 if m["role"] == "assistant"),
+                None
+            )
+            if last:
+                worksheet.append_row([
+                    st.session_state.patient_id,
+                    last["content"]
+                ])
+                st.success("💾 Stored last GPT response.")
+            else:
+                st.warning("No GPT response found to store.")
+            # skip the normal chat flow'''
+
         st.session_state.messages.append(
             {"role": "user", "content": message_respondent}
         )
