@@ -171,6 +171,7 @@ if st.session_state.interview_active:
             # if it wasn’t the final JSON, show as normal chat
             if not is_final:
                 message_placeholder.markdown(message_interviewer)
+                print("Test")
                 st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
                 )
