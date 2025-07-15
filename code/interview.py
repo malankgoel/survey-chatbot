@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import config
-
+from utils import submit_to_google_form
 
 # Load API library
 if "gpt" in config.MODEL.lower():
@@ -164,5 +164,19 @@ if st.session_state.interview_active:
                 parsed = json.loads(message_interviewer)
                 st.subheader("JSON Output")
                 st.json(parsed)
+                resp = submit_to_google_form(
+                    parsed,
+                    st.session_state.enumerator_name,
+                    st.session_state.patient_id
+                )
+
+                if resp.status_code == 200:
+                    st.success("Interview saved to Google Sheets!")
+                    st.markdown("Thank you! The data was recorded successfully.")
+                else:
+                    st.error(f"Failed to save data (status {resp.status_code}). Please try again.")
+
+                st.session_state.interview_active = False
+                st.stop()
             except json.JSONDecodeError:
                 pass
