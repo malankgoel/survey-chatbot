@@ -28,26 +28,6 @@ if "start_time" not in st.session_state:
     )
 
 
-
-# Prompt for Enumerator Name
-if "enumerator_name" not in st.session_state:
-    st.session_state.enumerator_name = ""
-
-if not st.session_state.enumerator_name:
-    st.session_state.enumerator_name = st.text_input(
-        "Enter Enumerator Name:",
-        value=""
-    )
-    if not st.session_state.enumerator_name:
-        st.warning("Please enter an Enumerator Name to proceed.")
-        st.stop()
-else:
-    st.text_input(
-        "Enumerator Name:",
-        value=st.session_state.enumerator_name,
-        disabled=True
-    )
-
 # Prompt for PATIENT ID
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
@@ -167,7 +147,6 @@ if st.session_state.interview_active:
                 st.json(parsed)
                 resp = submit_to_google_form(
                     parsed,
-                    st.session_state.enumerator_name,
                     st.session_state.patient_id
                 )
 
