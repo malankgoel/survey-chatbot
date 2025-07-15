@@ -34,7 +34,7 @@ if "enumerator_name" not in st.session_state:
 
 if not st.session_state.enumerator_name:
     st.session_state.enumerator_name = st.text_input(
-        "Enter Enumerator Name:",
+        "Enter Enumerator Name Testing:",
         value=""
     )
     if not st.session_state.enumerator_name:
@@ -53,7 +53,7 @@ if "patient_id" not in st.session_state:
 
 if not st.session_state.patient_id:
     st.session_state.patient_id = st.text_input(
-        "Enter Patient ID Testing:", 
+        "Enter Patient ID:", 
         value=""
     )
     if not st.session_state.patient_id:
