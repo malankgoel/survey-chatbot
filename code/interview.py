@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import config
 from utils import submit_to_google_form
+import json
 
 # Load API library
 if "gpt" in config.MODEL.lower():
@@ -34,7 +35,7 @@ if "enumerator_name" not in st.session_state:
 
 if not st.session_state.enumerator_name:
     st.session_state.enumerator_name = st.text_input(
-        "Enter Enumerator Name Testing:",
+        "Enter Enumerator Name:",
         value=""
     )
     if not st.session_state.enumerator_name:
@@ -153,16 +154,16 @@ if st.session_state.interview_active:
                     message_placeholder.markdown(message_interviewer + "▌")
 
             # Display and store the message
-            message_placeholder.markdown(message_interviewer)
+            if '"diagnoses"' not in message_interviewer:
+                message_placeholder.markdown(message_interviewer)
             st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
             )
 
             # If this assistant response is your final JSON
             try:
-                import json
                 parsed = json.loads(message_interviewer)
-                st.subheader("JSON Output")
+                st.subheader("Output")
                 st.json(parsed)
                 resp = submit_to_google_form(
                     parsed,
