@@ -25,7 +25,7 @@ any discrepancy would produce errors.
 
 Below is just an example (not medically accurate):
 ***
-Diagnosis
+Diagnosis:
 Malaria - 0.46
 Reasoning: High fever, chills, recent onset; malaria is endemic in Freetown.
 
@@ -38,11 +38,11 @@ Reasoning: Fever with bleeding risk factors; less common but present in region.
 Influenza - 0.17
 Reasoning: Mild respiratory symptoms, seasonal overlap.
 
-Sources
+Sources:
 WHO Sierra Leone Malaria Factsheet (2024); CDC Typhoid Overview (2023); SL MoHS 
 Weekly Epidemiology Bulletin #12 (2025)
 
-Summary
+Summary:
 The patient reports a 3 day history of high fever, chills, and headache. Most 
 likely diagnosis is malaria (46 %); alternatives include typhoid and Lassa fever.
 Immediate malaria RDT and supportive care recommended. Follow-up if symptoms 
