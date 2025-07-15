@@ -34,7 +34,7 @@ if "enumerator_name" not in st.session_state:
 
 if not st.session_state.enumerator_name:
     st.session_state.enumerator_name = st.text_input(
-        "Enter Enumerator Name T:",
+        "Enter Enumerator Name:",
         value=""
     )
     if not st.session_state.enumerator_name:
