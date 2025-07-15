@@ -79,7 +79,7 @@ SYSTEM_PROMPT = f"""{Prompt}
 
 
 # API parameters
-MODEL = "o4-mini-2025-04-16"
+MODEL = "gpt-4.1-2025-04-14"
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
