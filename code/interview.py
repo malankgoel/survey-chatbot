@@ -26,6 +26,27 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
+
+
+# Prompt for Enumerator Name
+if "enumerator_name" not in st.session_state:
+    st.session_state.enumerator_name = ""
+
+if not st.session_state.enumerator_name:
+    st.session_state.enumerator_name = st.text_input(
+        "Enter Enumerator Name:",
+        value=""
+    )
+    if not st.session_state.enumerator_name:
+        st.warning("Please enter an Enumerator Name to proceed.")
+        st.stop()
+else:
+    st.text_input(
+        "Enumerator Name:",
+        value=st.session_state.enumerator_name,
+        disabled=True
+    )
+
 # Prompt for PATIENT ID
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
