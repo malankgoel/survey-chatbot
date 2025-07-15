@@ -38,7 +38,7 @@ FIELD_IDS = {
     "summary":      "entry.1586388785",
 }
 
-def submit_to_google_form(parsed, enumerator_name, patient_id):
+def submit_to_google_form(parsed, patient_id):
     form_data = {
         FIELD_IDS["patient_id"]:      patient_id,
     }
