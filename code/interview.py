@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import config
-import json
+
 
 # Load API library
 if "gpt" in config.MODEL.lower():
@@ -34,7 +34,7 @@ if "enumerator_name" not in st.session_state:
 
 if not st.session_state.enumerator_name:
     st.session_state.enumerator_name = st.text_input(
-        "Enter Enumerator Name Test:",
+        "Enter Enumerator Name T:",
         value=""
     )
     if not st.session_state.enumerator_name:
@@ -134,31 +134,35 @@ if st.session_state.interview_active:
         # Generate and display interviewer message
         with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
 
-            # Stream the assistant response into a placeholder
+            # Create placeholder for message in chat interface
             message_placeholder = st.empty()
+
+            # Initialise message of interviewer
             message_interviewer = ""
 
-            # Stream and show only the running text (no raw JSON dump)
-            stream = client.chat.completions.create(**api_kwargs)
-            for chunk in stream:
-                delta = chunk.choices[0].delta.content
-                if delta:
-                    message_interviewer += delta
+            if api == "openai":
+
+                # Stream responses
+                stream = client.chat.completions.create(**api_kwargs)
+
+                for message in stream:
+                    text_delta = message.choices[0].delta.content
+                    if text_delta != None:
+                        message_interviewer += text_delta
+                    
                     message_placeholder.markdown(message_interviewer + "▌")
 
-            # Finalize display
+            # Display and store the message
             message_placeholder.markdown(message_interviewer)
             st.session_state.messages.append(
-                {"role": "assistant", "content": message_interviewer}
+                    {"role": "assistant", "content": message_interviewer}
             )
 
-            # Check if it's the final JSON payload
-            import json
+            # If this assistant response is your final JSON
             try:
+                import json
                 parsed = json.loads(message_interviewer)
-                if isinstance(parsed, dict) and "diagnoses" in parsed:
-                    st.subheader("🔍 Final JSON Output")
-                    st.json(parsed)
-                    st.session_state.interview_active = False
+                st.subheader("JSON Output")
+                st.json(parsed)
             except json.JSONDecodeError:
                 pass
