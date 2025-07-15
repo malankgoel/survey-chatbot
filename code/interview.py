@@ -4,7 +4,6 @@ import config
 from utils import submit_to_google_form
 import json
 
-st.stop()
 # Load API library
 if "gpt" in config.MODEL.lower():
     api = "openai"
