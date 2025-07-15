@@ -15,7 +15,8 @@ Follow-up Questions (max 5)
   Avoid repeating or rephrasing earlier questions.
   Choose questions that best narrow down the top suspected conditions.
 
-Diagnosis & Report
+Only once those questions are done, produce JSON:
+Diagnosis & JSON Output
 After you've asked at most five follow-up questions, output **exactly one** 
 valid JSON object (no prefixes, no extra text) that matches this schema:
 
