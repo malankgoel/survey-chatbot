@@ -11,6 +11,12 @@ if "gpt" in config.MODEL.lower():
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 
+
+if st.button("🔄 Clear State"):
+    st.session_state.clear()
+    st.experimental_rerun()
+
+    
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
