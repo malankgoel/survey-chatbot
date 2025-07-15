@@ -162,7 +162,7 @@ if st.session_state.interview_active:
             try:
                 import json
                 parsed = json.loads(message_interviewer)
-                st.subheader("🔍 JSON Output")
+                st.subheader("JSON Output")
                 st.json(parsed)
             except json.JSONDecodeError:
                 pass
