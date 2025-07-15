@@ -34,7 +34,7 @@ if "enumerator_name" not in st.session_state:
 
 if not st.session_state.enumerator_name:
     st.session_state.enumerator_name = st.text_input(
-        "Enter Enumerator Name:",
+        "Enter Enumerator Name Test:",
         value=""
     )
     if not st.session_state.enumerator_name:
@@ -134,44 +134,31 @@ if st.session_state.interview_active:
         # Generate and display interviewer message
         with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
 
-            # Create placeholder for message in chat interface
+            # Stream the assistant response into a placeholder
             message_placeholder = st.empty()
-
-            # Initialise message of interviewer
             message_interviewer = ""
 
-            if api == "openai":
-
-                # Stream responses
-                stream = client.chat.completions.create(**api_kwargs)
-
-                for message in stream:
-                    text_delta = message.choices[0].delta.content
-                    if text_delta != None:
-                        message_interviewer += text_delta
-                    
+            # Stream and show only the running text (no raw JSON dump)
+            stream = client.chat.completions.create(**api_kwargs)
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    message_interviewer += delta
                     message_placeholder.markdown(message_interviewer + "▌")
 
-            is_final = False
+            # Finalize display
+            message_placeholder.markdown(message_interviewer)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": message_interviewer}
+            )
+
+            # Check if it's the final JSON payload
+            import json
             try:
                 parsed = json.loads(message_interviewer)
-                # only treat it as “final” if it has diagnoses
                 if isinstance(parsed, dict) and "diagnoses" in parsed:
-                    st.subheader("Final JSON Output")
+                    st.subheader("🔍 Final JSON Output")
                     st.json(parsed)
-                    # save it in history, then close out the chat
-                    st.session_state.messages.append(
-                        {"role": "assistant", "content": message_interviewer}
-                    )
                     st.session_state.interview_active = False
-                    is_final = True
             except json.JSONDecodeError:
                 pass
-
-            # if it wasn’t the final JSON, show as normal chat
-            if not is_final:
-                message_placeholder.markdown(message_interviewer)
-                st.write("Test")
-                st.session_state.messages.append(
-                    {"role": "assistant", "content": message_interviewer}
-                )
