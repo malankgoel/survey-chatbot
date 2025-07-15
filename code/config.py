@@ -10,7 +10,7 @@ prevalence—don't waste questions on obvious risk factors.
 Opening Prompt
 “Can you describe your symptoms and how long you've had them?”
 
-Follow-up Questions (max 5)
+Follow-up Questions (Ask upto 5 follow-up questions after the opening prompt):
   Ask one question at a time, each driven by the patient's prior answers.
   Avoid repeating or rephrasing earlier questions.
   Choose questions that best narrow down the top suspected conditions.

@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import config
-
+import json
 
 # Load API library
 if "gpt" in config.MODEL.lower():
@@ -152,17 +152,25 @@ if st.session_state.interview_active:
                     
                     message_placeholder.markdown(message_interviewer + "▌")
 
-            # Display and store the message
-            message_placeholder.markdown(message_interviewer)
-            st.session_state.messages.append(
-                    {"role": "assistant", "content": message_interviewer}
-            )
-
-            # If this assistant response *is* your final JSON
+            is_final = False
             try:
-                import json
                 parsed = json.loads(message_interviewer)
-                st.subheader("JSON Output")
-                st.json(parsed)
+                # only treat it as “final” if it has diagnoses
+                if isinstance(parsed, dict) and "diagnoses" in parsed:
+                    st.subheader("Final JSON Output")
+                    st.json(parsed)
+                    # save it in history, then close out the chat
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": message_interviewer}
+                    )
+                    st.session_state.interview_active = False
+                    is_final = True
             except json.JSONDecodeError:
                 pass
+
+            # if it wasn’t the final JSON, show as normal chat
+            if not is_final:
+                message_placeholder.markdown(message_interviewer)
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": message_interviewer}
+                )
