@@ -157,3 +157,13 @@ if st.session_state.interview_active:
             st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
             )
+
+            # If this assistant response *is* your final JSON, pretty‑print it
+            try:
+                import json
+                parsed = json.loads(message_interviewer)
+                st.subheader("🔍 JSON Output")
+                st.json(parsed)
+                # (we’re not ending the interview yet—just checking the JSON)
+            except json.JSONDecodeError:
+                pass
