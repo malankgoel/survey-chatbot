@@ -34,7 +34,7 @@ if "patient_id" not in st.session_state:
 
 if not st.session_state.patient_id:
     st.session_state.patient_id = st.text_input(
-        "Enter Patient ID 4.1:", 
+        "Enter Patient ID:", 
         value=""
     )
     if not st.session_state.patient_id:
@@ -143,8 +143,6 @@ if st.session_state.interview_active:
             # If this assistant response is your final JSON
             try:
                 parsed = json.loads(message_interviewer)
-                st.subheader("Output")
-                st.json(parsed)
                 resp = submit_to_google_form(
                     parsed,
                     st.session_state.patient_id
