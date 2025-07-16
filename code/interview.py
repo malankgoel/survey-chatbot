@@ -34,7 +34,7 @@ if "patient_id" not in st.session_state:
 
 if not st.session_state.patient_id:
     st.session_state.patient_id = st.text_input(
-        "Enter Patient ID Test:", 
+        "Enter Patient ID Testing:", 
         value=""
     )
     if not st.session_state.patient_id:
@@ -147,10 +147,11 @@ if st.session_state.interview_active:
                     parsed,
                     st.session_state.patient_id
                 )
+                message_placeholder.empty()
 
                 if resp.status_code == 200:
-                    st.success("Interview saved to Google Sheets!")
-                    st.markdown("Thank you! The data was recorded successfully.")
+                    st.success("Interview saved to Google Sheets successfully!")
+                    st.markdown("Please reload the page to start a new patient.")
                 else:
                     st.error(f"Failed to save data (status {resp.status_code}). Please try again.")
 
