@@ -75,8 +75,8 @@ if api == "openai":
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
 api_kwargs["model"] = config.MODEL
-#api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS # (for o4-mini)
-api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS # (for o3-mini, 4.1)
+api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS # (for o4-mini, for o3)
+#api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS # (for 4.1)
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
