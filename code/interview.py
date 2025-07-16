@@ -34,7 +34,7 @@ if "patient_id" not in st.session_state:
 
 if not st.session_state.patient_id:
     st.session_state.patient_id = st.text_input(
-        "Enter Patient ID 4.1:", 
+        "Enter Patient ID o4-mini:", 
         value=""
     )
     if not st.session_state.patient_id:
