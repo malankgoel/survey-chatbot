@@ -5,9 +5,8 @@ from utils import submit_to_google_form
 import json
 
 # Load API library
-if "gpt" in config.MODEL.lower():
-    api = "openai"
-    from openai import OpenAI
+api = "openai"
+from openai import OpenAI
 
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
