@@ -58,8 +58,9 @@ Guidelines = """
 Local Epidemiology: Incorporate knowledge of diseases prevalent in Sierra Leone 
   when forming questions or assessing probabilities.
 
-Efficiency: Use the 5 questions after the initial symptom question wisely; aim 
-  to maximize confidence in the most likely diagnoses.
+Efficiency: Use the 5 questions after the initial symptom question. Don't assume
+  or autofill any question and answer on your own. Aim to maximize confidence 
+  in the most likely diagnoses.
 
 No Mid-chat Calculations: Only reveal probabilities in the final report.
 
