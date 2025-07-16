@@ -33,7 +33,7 @@ if "patient_id" not in st.session_state:
 
 if not st.session_state.patient_id:
     st.session_state.patient_id = st.text_input(
-        "Enter Patient ID o4-mini:", 
+        "Enter Patient ID o3:", 
         value=""
     )
     if not st.session_state.patient_id:
@@ -75,7 +75,8 @@ if api == "openai":
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
 api_kwargs["model"] = config.MODEL
-api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
+#api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS # (for o4-mini)
+api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS # (for o3-mini, 4.1)
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
