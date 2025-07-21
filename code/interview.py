@@ -3,6 +3,9 @@ import time
 import config
 from utils import submit_to_google_form
 import json
+import re
+
+'''Test'''
 
 # Load API library
 api = "openai"
@@ -27,32 +30,14 @@ if "start_time" not in st.session_state:
     )
 
 
-# Prompt for PATIENT ID
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
-
-if not st.session_state.patient_id:
-    st.session_state.patient_id = st.text_input(
-        "Enter Patient ID o4:", 
-        value=""
-    )
-    if not st.session_state.patient_id:
-        st.warning("Please enter a Patient ID to proceed.")
-        st.stop()
-else:
-    st.text_input(
-        "Patient ID:", 
-        value=st.session_state.patient_id, 
-        disabled=True
-    )
 
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
 with col2:
-    # If interview is active and 'Quit' button is clicked
     if st.session_state.interview_active and st.button(
         "End", help="End the interview."):
-        # Set interview to inactive, display quit message, and store data
         st.session_state.interview_active = False
         quit_message = (
         "You have ended the interview.\n"
@@ -104,6 +89,13 @@ if st.session_state.interview_active:
 
     # Chat input and message for respondent
     if message_respondent := st.chat_input("Your message here"):
+        if not st.session_state.patient_id:
+            m = re.search(r"PID:\s*(\d+)", message_respondent)
+            if m:
+                st.session_state.patient_id = m.group(1)
+                message_respondent = re.sub(r"PID:\s*\d+\.\s*", "", message_respondent, count=1)
+
+
         st.session_state.messages.append(
             {"role": "user", "content": message_respondent}
         )

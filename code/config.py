@@ -15,6 +15,9 @@ duration. Optimise your follow-up questions around this information.
 
 Follow-up Questions:
   Ask one question at a time, each driven by the patient's prior answers.
+  Keep a running count. If you have asked fewer than 5 questions after the first 
+  symptom and prompt question, you MUST ask the next question instead of 
+  producing the JSON.
   Avoid repeating or rephrasing earlier questions.
   Choose questions that best narrow down the top suspected conditions.
 
