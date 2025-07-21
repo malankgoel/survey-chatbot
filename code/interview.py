@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import config
-from utils import submit_to_google_form
+from utils import submit_to_google_form, LEXICON
 import json
 import re
 from openai import OpenAI
@@ -27,7 +27,7 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-'''Test'''
+'''Testing'''
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
@@ -122,13 +122,23 @@ if st.session_state.interview_active:
                         message_interviewer += text_delta
                     
                     message_placeholder.markdown(message_interviewer + "▌")
-
-            # Display and store the message
+            
             if '"diagnoses"' not in message_interviewer:
+                # 1) render the GPT‑generated question
                 message_placeholder.markdown(message_interviewer)
+
+                # 2) look for any lexicon terms and display definitions
+                defs = []
+                for term, definition in LEXICON.items():
+                    if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
+                        defs.append(f"**Definition – {term}:** {definition}")
+                if defs:
+                    message_placeholder.markdown("\n\n".join(defs))
+            
             st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
             )
+
 
             # If this assistant response is your final JSON
             try:

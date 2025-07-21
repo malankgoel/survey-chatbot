@@ -50,6 +50,8 @@ json
 - **Exactly** this JSON, with these keys **in this order**.  
 - The `"qa_pairs"` array replaces any “messages” or timestamps—only 
   question/answer pairs.  
+- The `"qa_pairs" must contain the entire answers given by the patient and not a
+    summary.
 - The `"diagnoses"` array must contain **no more than five** objects.  
 - Each probability is a decimal between 0 and 1.  
 - No additional commentary before or after the JSON.
