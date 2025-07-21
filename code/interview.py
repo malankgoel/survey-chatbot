@@ -4,11 +4,6 @@ import config
 from utils import submit_to_google_form
 import json
 import re
-
-'''Test'''
-
-# Load API library
-api = "openai"
 from openai import OpenAI
 
 # Set page title and icon
@@ -29,7 +24,7 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-
+'''Test'''
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
