@@ -28,6 +28,18 @@ if "start_time" not in st.session_state:
     )
 
 '''Test'''
+
+# Prompt which model to use, then hold execution until confirmed
+if "selected_model" not in st.session_state:
+    choice = st.radio(
+        "Choose model:",
+        ("1", "2"),
+        format_func=lambda x: f"{x}: {'GPT-4.1' if x=='1' else 'o3'}",
+    )
+    if st.button("Start Interview"):
+        st.session_state.selected_model = config.MODEL_CHOICES[choice]
+    st.stop()
+
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
@@ -57,9 +69,12 @@ if api == "openai":
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
-api_kwargs["model"] = config.MODEL
-api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS # (for o4-mini, for o3)
-#api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS # (for 4.1)
+api_kwargs["model"]   = st.session_state.selected_model
+# use different token param depending on which model was selected
+if st.session_state.selected_model == config.MODEL:
+   api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS
+else:
+   api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
@@ -127,7 +142,7 @@ if st.session_state.interview_active:
                 defs = []
                 for term, definition in LEXICON.items():
                     if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
-                        defs.append(f"**Definition – {term}:** {definition}")
+                        defs.append(f"**Definition - {term}:** {definition}")
                 all_text = message_interviewer
                 if defs:
                     all_text += "\n\n" + "\n\n".join(defs)

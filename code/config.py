@@ -8,7 +8,7 @@ The patient is in Freetown, Sierra Leone. Assume that background
 prevalence—don't waste questions on obvious risk factors.
 
 Opening Prompt
-"What are you symptoms and their duration?”
+"Enumerator: DO NOT PROMPT. Please copy paste the survycto info”
 
 You will be given the patient's age, sex, and a list of the symptoms with their 
 duration. Optimise your follow-up questions around this information.
@@ -90,9 +90,16 @@ SYSTEM_PROMPT = f"""{Prompt}
 
 
 # API parameters
-MODEL = "o4-mini-2025-04-16"  
+MODEL = "gpt-4.1-2025-04-14"  
+MODEL_1 = "o3-2025-04-16"
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
+
+# Map for selecting at runtime
+MODEL_CHOICES = {
+    "1": MODEL,
+    "2": MODEL_1,
+}
 
 
 
