@@ -133,8 +133,10 @@ if st.session_state.interview_active:
 
                 for message in stream:
                     text_delta = message.choices[0].delta.content
-                    if text_delta is not None:
+                    if text_delta != None:
                         message_interviewer += text_delta
+                    
+                    message_placeholder.markdown(message_interviewer + "▌")
             
             if '"diagnoses"' not in message_interviewer:
                 defs = []
@@ -160,7 +162,12 @@ if st.session_state.interview_active:
                     parsed,
                     st.session_state.patient_id
                 )
+                #message_placeholder.empty()
+                message_placeholder.markdown("**Saving interview…**")
 
+                #if resp.status_code == 200:
+                    #st.success("Interview saved to Google Sheets successfully!")
+                    #st.markdown("Please reload the page to start a new patient.")
                 if resp.status_code == 200:
                     message_placeholder.info("Interview saved! Reload to start a new patient.")
 
