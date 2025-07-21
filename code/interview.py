@@ -27,7 +27,7 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-'''Testing'''
+'''Test'''
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
@@ -124,16 +124,16 @@ if st.session_state.interview_active:
                     message_placeholder.markdown(message_interviewer + "▌")
             
             if '"diagnoses"' not in message_interviewer:
-                # 1) render the GPT‑generated question
-                message_placeholder.markdown(message_interviewer)
-
-                # 2) look for any lexicon terms and display definitions
                 defs = []
                 for term, definition in LEXICON.items():
                     if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
                         defs.append(f"**Definition – {term}:** {definition}")
+                all_text = message_interviewer
                 if defs:
-                    message_placeholder.markdown("\n\n".join(defs))
+                    all_text += "\n\n" + "\n\n".join(defs)
+                
+                message_placeholder.markdown(all_text)
+
             
             st.session_state.messages.append(
                     {"role": "assistant", "content": message_interviewer}
