@@ -12,6 +12,8 @@ api = "openai"
 
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
+
+input_placeholder = st.empty()
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
@@ -162,17 +164,13 @@ if st.session_state.interview_active:
                     parsed,
                     st.session_state.patient_id
                 )
-                #message_placeholder.empty()
+                input_placeholder.empty()
                 message_placeholder.markdown("**Saving interview…**")
 
-                #if resp.status_code == 200:
-                    #st.success("Interview saved to Google Sheets successfully!")
-                    #st.markdown("Please reload the page to start a new patient.")
                 if resp.status_code == 200:
                     message_placeholder.info("Interview saved! Reload to start a new patient.")
 
                 else:
-                    #st.error(f"Failed to save data (status {resp.status_code}). Please try again.")
                     message_placeholder.info(f"Failed to save data (status {resp.status_code}). Please try again.")
                 
                 st.session_state.interview_active = False
