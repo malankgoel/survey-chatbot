@@ -6,9 +6,12 @@ import json
 import re
 from openai import OpenAI
 
+# Load API library
+api = "openai"
+
+
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
-
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
