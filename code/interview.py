@@ -16,6 +16,9 @@ st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
 
+if "interaction_step" not in st.session_state:
+    st.session_state.interaction_step = 0
+
 
 # Initialise messages list in session state
 if "messages" not in st.session_state:
@@ -110,31 +113,40 @@ if st.session_state.interview_active:
             next_step = st.session_state.interaction_step + 1
 
             # stream content but only display for steps 1–6
+            # stream the model’s reply
             stream = client.chat.completions.create(**api_kwargs)
             for chunk in stream:
                 delta = chunk.choices[0].delta.content or ""
                 message_interviewer += delta
+                # only render text + definitions for steps 1–6
                 if next_step < 7:
-                # always show definitions for steps 1–6
                     defs = []
                     for term, definition in LEXICON.items():
                         if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
                             defs.append(f"**Definition - {term}:** {definition}")
                     all_text = message_interviewer
-                if defs:
-                    all_text += "\n\n" + "\n\n".join(defs)
-                message_placeholder.markdown(all_text)
+                    if defs:
+                        all_text += "\n\n" + "\n\n".join(defs)
+                    message_placeholder.markdown(all_text)
+
+            # after streaming completes:
+            if next_step < 7:
+                # just advance to the next question
+                pass
             else:
-                # Step 7: suppress JSON display, submit data
+                # Step 7: hide JSON, submit, then stop so input vanishes
                 message_placeholder.empty()
-                # parse & submit
-                parsed = json.loads(message_interviewer)
-                resp = submit_to_google_form(parsed, st.session_state.patient_id)
-                st.info("**Saving interview…**")
-                if resp.status_code == 200:
-                    st.success("Interview saved! Reload to start a new patient.")
-                else:
-                    st.error(f"Failed to save data (status {resp.status_code}). Please try again.")
+                try:
+                    parsed = json.loads(message_interviewer)
+                    resp = submit_to_google_form(parsed, st.session_state.patient_id)
+                    st.info("**Saving interview…**")
+                    if resp.status_code == 200:
+                        st.success("Interview saved! Reload to start a new patient.")
+                    else:
+                        st.error(f"Failed to save data (status {resp.status_code}).")
+                except json.JSONDecodeError:
+                    st.error("Unexpected format; interview not saved.")
+                # turn off the interview and halt—so the chat_input inside `if interview_active` never runs again
                 st.session_state.interview_active = False
                 st.stop()
 
