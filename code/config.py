@@ -49,7 +49,8 @@ json
 **Requirements:**  
 - **Exactly** this JSON, with these keys **in this order**.  
 - The `"qa_pairs"` array replaces any “messages” or timestamps—only 
-  question/answer pairs.  
+  question/answer pairs. Include the opening prompt and the subsequent entry as
+  the first question/answer pair. 
 - The `"qa_pairs" must contain the entire answers given by the patient and not a
     summary.
 - The `"diagnoses"` array must contain **no more than five** objects.  

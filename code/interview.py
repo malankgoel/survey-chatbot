@@ -139,7 +139,6 @@ if st.session_state.interview_active:
                 try:
                     parsed = json.loads(message_interviewer)
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
-                    st.info("**Saving interview…**")
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")
                     else:
