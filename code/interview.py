@@ -1,3 +1,4 @@
+
 import streamlit as st
 import time
 import config
@@ -9,14 +10,12 @@ from openai import OpenAI
 # Load API library
 api = "openai"
 
-
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
-
-input_placeholder = st.empty()
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
+
 
 # Initialise messages list in session state
 if "messages" not in st.session_state:
@@ -28,8 +27,6 @@ if "start_time" not in st.session_state:
     st.session_state.start_time_file_names = time.strftime(
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
-
-'''Test'''
 
 # Prompt which model to use, then hold execution until confirmed
 if "selected_model" not in st.session_state:
@@ -52,15 +49,15 @@ with col2:
         "End", help="End the interview."):
         st.session_state.interview_active = False
         quit_message = (
-        "You have ended the interview.\n"
-        "Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
+            "You have ended the interview.\n"
+            "Please RELOAD THE PAGE and go to SURVEYCTO to start a new patient."
         )
         st.session_state.messages.append({"role": "assistant", "content": quit_message})
         st.warning(quit_message)
 
 # Upon rerun, display the previous conversation (except system prompt or first message)
 for message in st.session_state.messages[1:]:
-    avatar = config.AVATAR_INTERVIEWER if message["role"]=="assistant" else config.AVATAR_RESPONDENT
+    avatar = config.AVATAR_INTERVIEWER if message["role"] == "assistant" else config.AVATAR_RESPONDENT
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
@@ -71,109 +68,76 @@ if api == "openai":
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
-api_kwargs["model"]   = st.session_state.selected_model
-# use different token param depending on which model was selected
+api_kwargs["model"] = st.session_state.selected_model
 if st.session_state.selected_model == config.MODEL:
-   api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS
+    api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS
 else:
-   api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
+    api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
-# In case the interview history is still empty, pass system prompt to model, and
-# generate and display its first message
+# Initial system prompt & first interviewer message
 if not st.session_state.messages:
-
-    if api == "openai":
-
-        st.session_state.messages.append(
-            {"role": "system", "content": config.SYSTEM_PROMPT}
-        )
-        with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-            stream = client.chat.completions.create(**api_kwargs)
-            message_interviewer = st.write_stream(stream)
-
-    st.session_state.messages.append(
-        {"role": "assistant", "content": message_interviewer}
-    )
-
-
+    # add system prompt
+    st.session_state.messages.append({"role": "system", "content": config.SYSTEM_PROMPT})
+    with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
+        # stream first question
+        stream = client.chat.completions.create(**api_kwargs)
+        message_interviewer = st.write_stream(stream)
+    st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
+    # count as first interaction
+    st.session_state.interaction_step = 1
 
 # Main chat if interview is active
 if st.session_state.interview_active:
-
-    # Chat input and message for respondent
     if message_respondent := st.chat_input("Your message here"):
+        # extract patient_id if missing
         if not st.session_state.patient_id:
             m = re.search(r"PID:\s*(\d+)", message_respondent)
             if m:
                 st.session_state.patient_id = m.group(1)
-                message_respondent = re.sub(r"PID:\s*\d+\.\s*", "", message_respondent, count=1)
+                message_respondent = re.sub(r"PID:\s*\d+\.?\s*", "", message_respondent, count=1)
 
-
-        st.session_state.messages.append(
-            {"role": "user", "content": message_respondent}
-        )
-
-        # Display respondent message
+        # record user message
+        st.session_state.messages.append({"role": "user", "content": message_respondent})
         with st.chat_message("user", avatar=config.AVATAR_RESPONDENT):
             st.markdown(message_respondent)
 
-        # Generate and display interviewer message
+        # assistant response
         with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-
-            # Create placeholder for message in chat interface
             message_placeholder = st.empty()
-
-            # Initialise message of interviewer
             message_interviewer = ""
+            next_step = st.session_state.interaction_step + 1
 
-            if api == "openai":
-
-                # Stream responses
-                stream = client.chat.completions.create(**api_kwargs)
-
-                for message in stream:
-                    text_delta = message.choices[0].delta.content
-                    if text_delta != None:
-                        message_interviewer += text_delta
-                    
-                    message_placeholder.markdown(message_interviewer + "▌")
-            
-            if '"diagnoses"' not in message_interviewer:
-                defs = []
-                for term, definition in LEXICON.items():
-                    if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
-                        defs.append(f"**Definition - {term}:** {definition}")
-                all_text = message_interviewer
+            # stream content but only display for steps 1–6
+            stream = client.chat.completions.create(**api_kwargs)
+            for chunk in stream:
+                delta = chunk.choices[0].delta.content or ""
+                message_interviewer += delta
+                if next_step < 7:
+                # always show definitions for steps 1–6
+                    defs = []
+                    for term, definition in LEXICON.items():
+                        if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
+                            defs.append(f"**Definition - {term}:** {definition}")
+                    all_text = message_interviewer
                 if defs:
                     all_text += "\n\n" + "\n\n".join(defs)
-                
                 message_placeholder.markdown(all_text)
-
-            
-            st.session_state.messages.append(
-                    {"role": "assistant", "content": message_interviewer}
-            )
-
-
-            # If this assistant response is your final JSON
-            try:
+            else:
+                # Step 7: suppress JSON display, submit data
+                message_placeholder.empty()
+                # parse & submit
                 parsed = json.loads(message_interviewer)
-                resp = submit_to_google_form(
-                    parsed,
-                    st.session_state.patient_id
-                )
-                input_placeholder.empty()
-                message_placeholder.markdown("**Saving interview…**")
-
+                resp = submit_to_google_form(parsed, st.session_state.patient_id)
+                st.info("**Saving interview…**")
                 if resp.status_code == 200:
-                    message_placeholder.info("Interview saved! Reload to start a new patient.")
-
+                    st.success("Interview saved! Reload to start a new patient.")
                 else:
-                    message_placeholder.info(f"Failed to save data (status {resp.status_code}). Please try again.")
-                
+                    st.error(f"Failed to save data (status {resp.status_code}). Please try again.")
                 st.session_state.interview_active = False
                 st.stop()
-            except json.JSONDecodeError:
-                pass
+
+            # save assistant message & increment step
+            st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
+            st.session_state.interaction_step = next_step
