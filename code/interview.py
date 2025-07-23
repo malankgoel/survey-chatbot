@@ -137,7 +137,8 @@ if st.session_state.interview_active:
                 # Step 7: hide JSON, submit, then stop so input vanishes
                 message_placeholder.empty()
                 try:
-                    parsed = json.loads(message_interviewer)
+                    clean = message_interviewer.strip()
+                    parsed = json.loads(clean)
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")
@@ -145,9 +146,7 @@ if st.session_state.interview_active:
                         st.error(f"Failed to save data (status {resp.status_code}).")
                 except json.JSONDecodeError:
                     st.error("Unexpected format; interview not saved.")
-                # turn off the interview and halt—so the chat_input inside `if interview_active` never runs again
                 st.session_state.interview_active = False
-                st.stop()
 
             # save assistant message & increment step
             st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
