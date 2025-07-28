@@ -79,6 +79,12 @@ else:
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
+if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
+    api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
+
+# then you do:
+stream = client.chat.completions.create(**api_kwargs)
+
 # Initial system prompt & first interviewer message
 if not st.session_state.messages:
     # add system prompt
