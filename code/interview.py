@@ -1,4 +1,3 @@
-
 import streamlit as st
 import time
 import config
@@ -141,14 +140,12 @@ if st.session_state.interview_active:
                 message_interviewer += delta
                 # only render text + definitions for steps 1–6
                 if next_step < 7:
-                    defs = []
+                    # annotate each technical term inline, e.g. "foo (definition of foo)"
+                    annotated = message_interviewer
                     for term, definition in LEXICON.items():
-                        if re.search(rf'\b{re.escape(term)}\b', message_interviewer, flags=re.IGNORECASE):
-                            defs.append(f"**Definition - {term}:** {definition}")
-                    all_text = message_interviewer
-                    if defs:
-                        all_text += "\n\n" + "\n\n".join(defs)
-                    message_placeholder.markdown(all_text)
+                        pattern = re.compile(rf'\b{re.escape(term)}\b', flags=re.IGNORECASE)
+                        annotated = pattern.sub(lambda m: f"{m.group(0)} ({definition})", annotated)
+                    message_placeholder.markdown(annotated)
 
             # after streaming completes:
             if next_step < 7:
