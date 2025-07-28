@@ -69,6 +69,13 @@ if api == "openai":
     client = OpenAI(api_key=st.secrets["API_KEY_OPENAI"])
     api_kwargs = {"stream": True}
 
+if st.session_state.selected_model == config.MODEL_CHOICES["2"]:  # assuming "2" → "o3"
+    st.session_state.reasoning_effort = st.radio(
+        "Reasoning Effort",
+        ("low", "medium", "high"),
+        index=1,  # default to “medium”
+    )
+
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
 api_kwargs["model"] = st.session_state.selected_model
@@ -80,8 +87,7 @@ if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
 if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
-    api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
-
+    api_kwargs["reasoning_effort"] = st.session_state.reasoning_effort
 
 # Initial system prompt & first interviewer message
 if not st.session_state.messages:
