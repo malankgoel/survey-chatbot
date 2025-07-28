@@ -42,6 +42,22 @@ if "selected_model" not in st.session_state:
         st.session_state.selected_model = config.MODEL_CHOICES[choice]
     st.stop()
 
+# ─── Reasoning Effort picker ───
+if (
+    st.session_state.selected_model == config.MODEL_CHOICES["2"]
+    and "reasoning_effort" not in st.session_state
+):
+    effort_choice = st.radio(
+        "Choose reasoning effort:",
+        ("low", "medium", "high"),
+        index=1,
+        format_func=lambda x: x.capitalize(),
+    )
+    if st.button("Confirm Effort Level"):
+        st.session_state.reasoning_effort = effort_choice
+    st.stop()
+
+
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
@@ -69,12 +85,7 @@ if api == "openai":
     client = OpenAI(api_key=st.secrets["API_KEY_OPENAI"])
     api_kwargs = {"stream": True}
 
-if st.session_state.selected_model == config.MODEL_CHOICES["2"]:  # assuming "2" → "o3"
-    st.session_state.reasoning_effort = st.radio(
-        "Reasoning Effort",
-        ("low", "medium", "high"),
-        index=1,  # default to “medium”
-    )
+
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
