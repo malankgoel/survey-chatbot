@@ -104,7 +104,7 @@ MODEL_CHOICES = {
     "1": MODEL,
     "2": MODEL_1,
 }
-REASONING_EFFORT = "low"  # "low" | "medium" | "high"
+REASONING_EFFORT = "medium"  # "low" | "medium" | "high"
 
 
 # Avatars displayed in the chat interface
