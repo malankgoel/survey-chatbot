@@ -21,7 +21,7 @@ Follow-up Questions:
   Avoid repeating or rephrasing earlier questions.
   Choose questions that best narrow down the top suspected conditions.
 
-Only once those questions are done, produce JSON:
+Only once those questions are done, produce JSON with no extra text or commentary:
 Diagnosis & JSON Output
 After you've asked your questions, output **exactly one** 
 valid JSON object (no prefixes, no extra text) that matches this schema:
