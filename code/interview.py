@@ -154,6 +154,7 @@ if st.session_state.interview_active:
                 # Step 7: hide JSON, submit, then stop so input vanishes
                 message_placeholder.empty()
                 try:
+                    st.write("DEBUG RAW OUTPUT:", message_interviewer)
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
                     if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
