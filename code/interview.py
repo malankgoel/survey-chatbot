@@ -149,7 +149,6 @@ if st.session_state.interview_active:
 
             # after streaming completes:
             if next_step < 7:
-                # just advance to the next question
                 pass
             else:
                 # Step 7: hide JSON, submit, then stop so input vanishes
@@ -157,6 +156,10 @@ if st.session_state.interview_active:
                 try:
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
+                    if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
+                        parsed["model_info"] = f"o3, {st.session_state.reasoning_effort}"
+                    else:
+                        parsed["model_info"] = "4.1"
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")

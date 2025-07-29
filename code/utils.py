@@ -109,6 +109,7 @@ GOOGLE_FORM_URL = (
 )
 
 FIELD_IDS = {
+    "model_info":   "entry.635504491",
     "patient_id":      "entry.1962987405",
     "q1": "entry.1682844956", "a1": "entry.1580560439",
     "q2": "entry.851565605", "a2": "entry.2141302437",
@@ -140,6 +141,7 @@ FIELD_IDS = {
 }
 
 def submit_to_google_form(parsed, patient_id):
+    form_data[FIELD_IDS["model_info"]] = parsed.get("model_info", "")
     form_data = {
         FIELD_IDS["patient_id"]:      patient_id,
     }
