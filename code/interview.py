@@ -154,7 +154,6 @@ if st.session_state.interview_active:
                 # Step 7: hide JSON, submit, then stop so input vanishes
                 message_placeholder.empty()
                 try:
-                    st.write("DEBUG RAW OUTPUT:", message_interviewer)
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
                     if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
@@ -168,6 +167,7 @@ if st.session_state.interview_active:
                         st.error(f"Failed to save data (status {resp.status_code}).")
                 except json.JSONDecodeError:
                     st.error("Unexpected format; interview not saved.")
+                    st.write("DEBUG RAW OUTPUT:", message_interviewer)
                 st.session_state.interview_active = False
 
             # save assistant message & increment step
