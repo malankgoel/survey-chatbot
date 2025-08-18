@@ -67,14 +67,22 @@ MAX_OUTPUT_TOKENS = 7000
 # Hide Streamlit’s bottom-right buttons/badges to avoid accidental taps in mobile
 HIDE_MOBILE_BUTTONS_CSS = """
 <style>
-/* Hide Streamlit viewer badge / deploy / toolbar / footer / menu */
-footer, #MainMenu {visibility: hidden;}
-[data-testid="stToolbar"] {display:none !important;}
-button[title="Manage app"] {display:none !important;}
-a[href*="streamlit.io"] {display:none !important;}
-/* Some hosted variants use these classes for the badge */
-.viewerBadge_container__1QSob, .viewerBadge_link__1S6FE {display:none !important;}
+/* Hide menu/footer and badges */
+#MainMenu, footer { visibility: hidden; }
+.viewerBadge_container__1QSob, .viewerBadge_link__1S6FE,
+a[href*="streamlit.io"] { display:none !important; }
+
+/* Keep the top-right toolbar visible but unclickable */
+[data-testid="stToolbar"] { pointer-events: none; }
+
+/* Show ONLY the status pill (Running/Connecting), hide all other toolbar children */
+[data-testid="stToolbar"] > :not(:is([data-testid="stStatusWidget"], [data-testid="stConnectionStatus"])) {
+  display: none !important;
+}
+
+/* If Streamlit adds new classes, the status pill still shows because we didn't hide the toolbar itself */
 </style>
+
 """
 
 
