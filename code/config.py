@@ -58,14 +58,20 @@ SYSTEM_PROMPT = f"""{Prompt}
 """
 
 
-MODEL = "o3-2025-04-16"                      # single model — no user choice
-REASONING_EFFORT = "low"          # "low" | "medium" | "high" (backend-controlled)
-ENFORCE_JSON_AT_STEP7 = True         # force JSON only for the final output turn
+# API parameters
+MODEL = "gpt-4.1-2025-04-14"  
+MODEL_1 = "o3-2025-04-16"
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
-# Hide Streamlit’s bottom-right buttons/badges to avoid accidental taps in mobile
-HIDE_MOBILE_BUTTONS_CSS = """
+# Map for selecting at runtime
+MODEL_CHOICES = {
+    "1": MODEL,
+    "2": MODEL_1,
+}
+REASONING_EFFORT = "low"  # "low" | "medium" | "high"
+
+HIDE_MOBILE_BUTTON_CSS = """
 <style>
 /* Hide menu/footer and badges */
 #MainMenu, footer { visibility: hidden; }
@@ -82,10 +88,7 @@ a[href*="streamlit.io"] { display:none !important; }
 
 /* If Streamlit adds new classes, the status pill still shows because we didn't hide the toolbar itself */
 </style>
-
 """
-
-
 
 # Avatars displayed in the chat interface
 AVATAR_INTERVIEWER = "\U0001F393"

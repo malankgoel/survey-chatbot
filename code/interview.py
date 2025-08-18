@@ -32,17 +32,31 @@ if "start_time" not in st.session_state:
 
 st.markdown(config.HIDE_MOBILE_BUTTONS_CSS, unsafe_allow_html=True)
 
-# Backend-only control of reasoning + JSON
+# Prompt which model to use, then hold execution until confirmed
 if "selected_model" not in st.session_state:
-    st.session_state.selected_model = None
-
-# Simple start gate (no model choice in UI)
-if st.session_state.selected_model is None:
-    st.button("Start interview", type="primary", on_click=lambda: st.session_state.update(
-        {"selected_model": config.MODEL}
-    ))
+    choice = st.radio(
+        "Choose model:",
+        ("1", "2"),
+        format_func=lambda x: f"{x}: {'GPT-4.1' if x=='1' else 'o3'}",
+    )
+    if st.button("Start Interview"):
+        st.session_state.selected_model = config.MODEL_CHOICES[choice]
     st.stop()
 
+# ─── Reasoning Effort picker ───
+if (
+    st.session_state.selected_model == config.MODEL_CHOICES["2"]
+    and "reasoning_effort" not in st.session_state
+):
+    effort_choice = st.radio(
+        "Choose reasoning effort:",
+        ("low", "medium", "high"),
+        index=1,
+        format_func=lambda x: x.capitalize(),
+    )
+    if st.button("Confirm Effort Level"):
+        st.session_state.reasoning_effort = effort_choice
+    st.stop()
 
 
 if "patient_id" not in st.session_state:
@@ -75,16 +89,17 @@ if api == "openai":
 
 
 # API kwargs
-api_kwargs = {"stream": True}
 api_kwargs["messages"] = st.session_state.messages
-api_kwargs["model"] = st.session_state.selected_model  # "gpt-5"
-api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
+api_kwargs["model"] = st.session_state.selected_model
+if st.session_state.selected_model == config.MODEL:
+    api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS
+else:
+    api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
-# backend-controlled reasoning effort (no UI)
-if config.REASONING_EFFORT:
-    api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
 
+if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
+    api_kwargs["reasoning_effort"] = st.session_state.reasoning_effort
 
 # Initial system prompt & first interviewer message
 if not st.session_state.messages:
@@ -94,11 +109,6 @@ if not st.session_state.messages:
         # stream first question
         stream = client.chat.completions.create(**api_kwargs)
         message_interviewer = st.write_stream(stream)
-        # Fallback (rare): if streaming returned empty, retry once without streaming
-        if not (message_interviewer or "").strip():
-            non_stream = client.chat.completions.create(**{**api_kwargs, "stream": False})
-            message_interviewer = non_stream.choices[0].message.content
-
     st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
     # count as first interaction
     st.session_state.interaction_step = 1
