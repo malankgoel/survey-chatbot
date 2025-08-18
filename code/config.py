@@ -71,7 +71,7 @@ MODEL_CHOICES = {
 }
 REASONING_EFFORT = "low"  # "low" | "medium" | "high"
 
-HIDE_MOBILE_BUTTON_CSS = """
+HIDE_MOBILE_BUTTONS_CSS = """
 <style>
 /* Hide menu/footer and badges */
 #MainMenu, footer { visibility: hidden; }
