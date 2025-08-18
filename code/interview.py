@@ -1,7 +1,3 @@
-
-
-
-
 import streamlit as st
 import time
 import config
@@ -15,17 +11,6 @@ api = "openai"
 
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
-
-# Hide Streamlit footer buttons
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stActionButtonIcon {visibility: hidden;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
@@ -45,11 +30,33 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-# Force GPT-5 with Start button
+# Hide bottom-right mobile buttons (admin / streamlit)
+st.markdown(config.HIDE_MOBILE_BUTTONS_CSS, unsafe_allow_html=True)
+
+# Backend-only control of reasoning + JSON
 if "selected_model" not in st.session_state:
-    if st.button("Start Interview"):
-        st.session_state.selected_model = config.MODEL_5  # we'll define this in config.py
-        st.stop()
+    st.session_state.selected_model = None
+
+# Simple start gate (no model choice in UI)
+if st.session_state.selected_model is None:
+    st.button("Start interview", type="primary", on_click=lambda: st.session_state.update(
+        {"selected_model": config.MODEL}
+    ))
+    st.stop()
+
+# UI/input lock guards to prevent typing during streaming or reconnect
+if "ui_locked" not in st.session_state:
+    st.session_state.ui_locked = False
+if "inflight" not in st.session_state:
+    st.session_state.inflight = False
+if "lock_reason" not in st.session_state:
+    st.session_state.lock_reason = ""
+def _lock(reason="Processing…"):
+    st.session_state.ui_locked = True
+    st.session_state.lock_reason = reason
+def _unlock():
+    st.session_state.ui_locked = False
+    st.session_state.lock_reason = ""
 
 
 if "patient_id" not in st.session_state:
@@ -81,12 +88,17 @@ if api == "openai":
 
 
 
-# API kwargs
+
+api_kwargs = {"stream": True}
 api_kwargs["messages"] = st.session_state.messages
-api_kwargs["model"] = config.MODEL_5
+api_kwargs["model"] = st.session_state.selected_model
 api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
+if config.REASONING_EFFORT:
+    api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
+
+
 
 
 # Initial system prompt & first interviewer message
@@ -97,19 +109,26 @@ if not st.session_state.messages:
         # stream first question
         stream = client.chat.completions.create(**api_kwargs)
         message_interviewer = st.write_stream(stream)
+        # Fallback (rare): if streaming returned empty, retry once without streaming
+        if not (message_interviewer or "").strip():
+            non_stream = client.chat.completions.create(**{**api_kwargs, "stream": False})
+            message_interviewer = non_stream.choices[0].message.content
+
     st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
     # count as first interaction
     st.session_state.interaction_step = 1
 
 # Main chat if interview is active
 if st.session_state.interview_active:
-    connection_status = st.status("Checking connection...", expanded=False)
-    if st.runtime.scriptrunner.script_run_context.get_script_run_state() != "RUNNING":
-        st.warning("Reconnecting... Please wait.")
-        st.stop()
-    connection_status.update(label="Connected!", state="complete", expanded=False)
+    message_respondent = None
+    if st.session_state.ui_locked or st.session_state.inflight:
+        st.info(st.session_state.lock_reason or "Reconnecting… input disabled.")
+    else:
+        message_respondent = st.chat_input("Your message here")
 
-    if message_respondent := st.chat_input("Your message here"):
+    if message_respondent:
+        _lock("Processing…")
+        st.session_state.inflight = True
         # extract patient_id if missing
         if not st.session_state.patient_id:
             m = re.search(r"PID:\s*(\d+)", message_respondent)
@@ -130,7 +149,11 @@ if st.session_state.interview_active:
 
             # stream content but only display for steps 1–6
             # stream the model’s reply
-            stream = client.chat.completions.create(**api_kwargs)
+            kwargs = dict(api_kwargs)
+            if getattr(config, "ENFORCE_JSON_AT_STEP7", False) and next_step >= 7:
+                # Force a single well-formed JSON object on the final output
+                kwargs["response_format"] = {"type": "json_object"}
+            stream = client.chat.completions.create(**kwargs)
             for chunk in stream:
                 delta = chunk.choices[0].delta.content or ""
                 message_interviewer += delta
@@ -143,6 +166,11 @@ if st.session_state.interview_active:
                         annotated = pattern.sub(lambda m: f"{m.group(0)} ({definition})", annotated)
                     message_placeholder.markdown(annotated)
 
+
+            # Fallback if nothing streamed (rare network edge)
+            if not (message_interviewer or "").strip():
+                non_stream = client.chat.completions.create(**{**kwargs, "stream": False})
+                message_interviewer = non_stream.choices[0].message.content or ""
             # after streaming completes:
             if next_step < 7:
                 pass
@@ -152,10 +180,7 @@ if st.session_state.interview_active:
                 try:
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
-                    if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
-                        parsed["model_info"] = f"o3, {st.session_state.reasoning_effort}"
-                    else:
-                        parsed["model_info"] = "4.1"
+                    parsed["model_info"] = f"gpt-5, effort={config.REASONING_EFFORT}"
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")

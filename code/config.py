@@ -1,6 +1,3 @@
-
-
-
 Prompt = """
 Developer: 
 You are a medical interviewer. Your role is to ask 5 highly targeted and context-aware questions about a patient after you receive their initial symptom list, then generate a ranked list of probable diagnoses with concise reasoning and authoritative sources.
@@ -55,20 +52,30 @@ Model Guidance:
 Approach the task with maximal context utilization, focusing on diagnostic accuracy, clarity, and strict adherence to output structure.
 """
 
-REASONING_EFFORT = "low"  # "low" | "medium" | "high"
+
 # System prompt
 SYSTEM_PROMPT = f"""{Prompt}
-
-[Reasoning Effort: {REASONING_EFFORT}]
 """
 
 
-# API parameters
-MODEL_5 = "gpt-5-2025-08-07" 
+MODEL = "gpt-5-2025-08-07"                      # single model — no user choice
+REASONING_EFFORT = "low"          # "low" | "medium" | "high" (backend-controlled)
+ENFORCE_JSON_AT_STEP7 = True         # force JSON only for the final output turn
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
-
+# Hide Streamlit’s bottom-right buttons/badges to avoid accidental taps in mobile
+HIDE_MOBILE_BUTTONS_CSS = """
+<style>
+/* Hide Streamlit viewer badge / deploy / toolbar / footer / menu */
+footer, #MainMenu {visibility: hidden;}
+[data-testid="stToolbar"] {display:none !important;}
+button[title="Manage app"] {display:none !important;}
+a[href*="streamlit.io"] {display:none !important;}
+/* Some hosted variants use these classes for the badge */
+.viewerBadge_container__1QSob, .viewerBadge_link__1S6FE {display:none !important;}
+</style>
+"""
 
 
 
