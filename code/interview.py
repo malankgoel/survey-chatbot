@@ -88,10 +88,6 @@ api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
 
-# Add this before sending prompt to OpenAI
-if "force_json" not in st.session_state:
-    api_kwargs["response_format"] = "json"
-
 
 # Initial system prompt & first interviewer message
 if not st.session_state.messages:
