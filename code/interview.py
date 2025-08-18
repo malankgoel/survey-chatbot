@@ -84,12 +84,23 @@ if not st.session_state.messages:
     # add system prompt
     st.session_state.messages.append({"role": "system", "content": config.SYSTEM_PROMPT})
     with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-        # stream first question
+        # stream first question (same manual loop as later turns)
+        message_placeholder = st.empty()
+        message_interviewer = ""
         stream = client.chat.completions.create(**api_kwargs)
-        message_interviewer = st.write_stream(stream)
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content or ""
+            message_interviewer += delta
+            # render live (with lexicon, like later turns)
+            annotated = message_interviewer
+            for term, definition in LEXICON.items():
+                pattern = re.compile(rf'\b{re.escape(term)}\b', flags=re.IGNORECASE)
+                annotated = pattern.sub(lambda m: f"{m.group(0)} ({definition})", annotated)
+            message_placeholder.markdown(annotated)
     st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
     # count as first interaction
     st.session_state.interaction_step = 1
+
 
 # Main chat if interview is active
 if st.session_state.interview_active:
