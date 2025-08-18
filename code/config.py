@@ -102,13 +102,8 @@ REASONING_EFFORT = "low"  # "low" | "medium" | "high"
 
 HIDE_MOBILE_BUTTONS_CSS = """
 <style>
-/* Hide Streamlit viewer badge / deploy / toolbar / footer / menu */
-footer, #MainMenu {visibility: hidden;}
-[data-testid="stToolbar"] {display:none !important;}
-button[title="Manage app"] {display:none !important;}
-a[href*="streamlit.io"] {display:none !important;}
-/* Some hosted variants use these classes for the badge */
-.viewerBadge_container__1QSob, .viewerBadge_link__1S6FE {display:none !important;}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 </style>
 """
 
