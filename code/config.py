@@ -87,11 +87,11 @@ SYSTEM_PROMPT = f"""{Prompt}
 """
 
 
-MODEL = "o3-2025-04-16"
+MODEL = "gpt-5-2025-08-07"
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
-REASONING_EFFORT = "low"  # "low" | "medium" | "high"
+REASONING_EFFORT = "low"
 
 HIDE_MOBILE_BUTTONS_CSS = """
 <style>
