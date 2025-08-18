@@ -83,16 +83,10 @@ if api == "openai":
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
-api_kwargs["model"] = st.session_state.selected_model
-if st.session_state.selected_model == config.MODEL:
-    api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS
-else:
-    api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
+api_kwargs["model"] = config.MODEL_5
+api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
-
-if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
-    api_kwargs["reasoning_effort"] = st.session_state.reasoning_effort
 
 # Add this before sending prompt to OpenAI
 if "force_json" not in st.session_state:
