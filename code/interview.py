@@ -1,3 +1,7 @@
+
+
+
+
 import streamlit as st
 import time
 import config
@@ -11,6 +15,17 @@ api = "openai"
 
 # Set page title and icon
 st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
+
+# Hide Streamlit footer buttons
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stActionButtonIcon {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # Initialise session state
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
@@ -30,31 +45,11 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-# Prompt which model to use, then hold execution until confirmed
+# Force GPT-5 with Start button
 if "selected_model" not in st.session_state:
-    choice = st.radio(
-        "Choose model:",
-        ("1", "2"),
-        format_func=lambda x: f"{x}: {'GPT-4.1' if x=='1' else 'o3'}",
-    )
     if st.button("Start Interview"):
-        st.session_state.selected_model = config.MODEL_CHOICES[choice]
-    st.stop()
-
-# ─── Reasoning Effort picker ───
-if (
-    st.session_state.selected_model == config.MODEL_CHOICES["2"]
-    and "reasoning_effort" not in st.session_state
-):
-    effort_choice = st.radio(
-        "Choose reasoning effort:",
-        ("low", "medium", "high"),
-        index=1,
-        format_func=lambda x: x.capitalize(),
-    )
-    if st.button("Confirm Effort Level"):
-        st.session_state.reasoning_effort = effort_choice
-    st.stop()
+        st.session_state.selected_model = config.MODEL_5  # we'll define this in config.py
+        st.stop()
 
 
 if "patient_id" not in st.session_state:
@@ -99,6 +94,11 @@ if config.TEMPERATURE is not None:
 if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
     api_kwargs["reasoning_effort"] = st.session_state.reasoning_effort
 
+# Add this before sending prompt to OpenAI
+if "force_json" not in st.session_state:
+    api_kwargs["response_format"] = "json"
+
+
 # Initial system prompt & first interviewer message
 if not st.session_state.messages:
     # add system prompt
@@ -113,6 +113,12 @@ if not st.session_state.messages:
 
 # Main chat if interview is active
 if st.session_state.interview_active:
+    connection_status = st.status("Checking connection...", expanded=False)
+    if st.runtime.scriptrunner.script_run_context.get_script_run_state() != "RUNNING":
+        st.warning("Reconnecting... Please wait.")
+        st.stop()
+    connection_status.update(label="Connected!", state="complete", expanded=False)
+
     if message_respondent := st.chat_input("Your message here"):
         # extract patient_id if missing
         if not st.session_state.patient_id:

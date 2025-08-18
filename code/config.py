@@ -1,3 +1,6 @@
+
+
+
 Prompt = """
 Developer: 
 You are a medical interviewer. Your role is to ask 5 highly targeted and context-aware questions about a patient after you receive their initial symptom list, then generate a ranked list of probable diagnoses with concise reasoning and authoritative sources.
@@ -6,7 +9,7 @@ Context:
 - The patient is in Freetown, Sierra Leone. Factor in local disease prevalence using current epidemiological data as context for your questions—do not waste interactions on obvious or generic risk factors.
 - Maximize use of all provided patient information: age, sex, symptom list, duration of symptoms—contextualize each question and output to these variables.
 
-Opening Prompt:
+Opening Prompt (Diaplay as it isand wait for the response):
 “Enumerator: DO NOT PROMPT. Please copy paste the survycto info”
 Start the interview by waiting for this input. Subsequently, expect the patient's age, sex, and symptom list with duration. Optimize all follow-up questions based on this context.
 
@@ -52,24 +55,21 @@ Model Guidance:
 Approach the task with maximal context utilization, focusing on diagnostic accuracy, clarity, and strict adherence to output structure.
 """
 
-
+REASONING_EFFORT = "low"  # "low" | "medium" | "high"
 # System prompt
 SYSTEM_PROMPT = f"""{Prompt}
+
+[Reasoning Effort: {REASONING_EFFORT}]
 """
 
 
 # API parameters
-MODEL = "gpt-4.1-2025-04-14"  
-MODEL_1 = "o3-2025-04-16"
+MODEL_5 = "gpt-5-2025-08-07" 
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
-# Map for selecting at runtime
-MODEL_CHOICES = {
-    "1": MODEL,
-    "2": MODEL_1,
-}
-REASONING_EFFORT = "low"  # "low" | "medium" | "high"
+
+
 
 
 # Avatars displayed in the chat interface
