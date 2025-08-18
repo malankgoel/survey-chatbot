@@ -58,7 +58,7 @@ SYSTEM_PROMPT = f"""{Prompt}
 """
 
 
-MODEL = "gpt-5-2025-08-07"                      # single model — no user choice
+MODEL = "o3-2025-04-16"                      # single model — no user choice
 REASONING_EFFORT = "low"          # "low" | "medium" | "high" (backend-controlled)
 ENFORCE_JSON_AT_STEP7 = True         # force JSON only for the final output turn
 TEMPERATURE = None  # (None for default value)
