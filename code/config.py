@@ -87,23 +87,28 @@ SYSTEM_PROMPT = f"""{Prompt}
 """
 
 
-# API parameters
-MODEL = "gpt-4.1-2025-04-14"  
-MODEL_1 = "o3-2025-04-16"
+MODEL = "o3-2025-04-16"
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
-# Map for selecting at runtime
-MODEL_CHOICES = {
-    "1": MODEL,
-    "2": MODEL_1,
-}
 REASONING_EFFORT = "low"  # "low" | "medium" | "high"
 
 HIDE_MOBILE_BUTTONS_CSS = """
 <style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
+/* Hide menu/footer and badges */
+#MainMenu, footer { visibility: hidden; }
+.viewerBadge_container__1QSob, .viewerBadge_link__1S6FE,
+a[href*="streamlit.io"] { display:none !important; }
+
+/* Keep the top-right toolbar visible but unclickable */
+[data-testid="stToolbar"] { pointer-events: none; }
+
+/* Show ONLY the status pill (Running/Connecting), hide all other toolbar children */
+[data-testid="stToolbar"] > :not(:is([data-testid="stStatusWidget"], [data-testid="stConnectionStatus"])) {
+  display: none !important;
+}
+
+/* If Streamlit adds new classes, the status pill still shows because we didn't hide the toolbar itself */
 </style>
 """
 

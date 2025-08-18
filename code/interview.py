@@ -30,33 +30,15 @@ if "start_time" not in st.session_state:
         "%Y_%m_%d_%H_%M_%S", time.localtime(st.session_state.start_time)
     )
 
-st.markdown(config.HIDE_MOBILE_BUTTONS_CSS, unsafe_allow_html=True)
+#st.markdown(config.HIDE_MOBILE_BUTTONS_CSS, unsafe_allow_html=True)
 
-# Prompt which model to use, then hold execution until confirmed
+
 if "selected_model" not in st.session_state:
-    choice = st.radio(
-        "Choose model:",
-        ("1", "2"),
-        format_func=lambda x: f"{x}: {'GPT-4.1' if x=='1' else 'o3'}",
-    )
     if st.button("Start Interview"):
-        st.session_state.selected_model = config.MODEL_CHOICES[choice]
-    st.stop()
-
-# ─── Reasoning Effort picker ───
-if (
-    st.session_state.selected_model == config.MODEL_CHOICES["2"]
-    and "reasoning_effort" not in st.session_state
-):
-    effort_choice = st.radio(
-        "Choose reasoning effort:",
-        ("low", "medium", "high"),
-        index=1,
-        format_func=lambda x: x.capitalize(),
-    )
-    if st.button("Confirm Effort Level"):
-        st.session_state.reasoning_effort = effort_choice
-    st.stop()
+        st.session_state.selected_model = config.MODEL
+        st.session_state.reasoning_effort = config.REASONING_EFFORT
+    else:
+        st.stop()
 
 
 if "patient_id" not in st.session_state:
@@ -90,16 +72,12 @@ if api == "openai":
 
 # API kwargs
 api_kwargs["messages"] = st.session_state.messages
-api_kwargs["model"] = st.session_state.selected_model
-if st.session_state.selected_model == config.MODEL:
-    api_kwargs["max_tokens"] = config.MAX_OUTPUT_TOKENS
-else:
-    api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
+api_kwargs["model"] = st.session_state.selected_model  # o3
+api_kwargs["max_completion_tokens"] = config.MAX_OUTPUT_TOKENS
 if config.TEMPERATURE is not None:
     api_kwargs["temperature"] = config.TEMPERATURE
+api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
 
-if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
-    api_kwargs["reasoning_effort"] = st.session_state.reasoning_effort
 
 # Initial system prompt & first interviewer message
 if not st.session_state.messages:
@@ -158,10 +136,7 @@ if st.session_state.interview_active:
                 try:
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
-                    if st.session_state.selected_model == config.MODEL_CHOICES["2"]:
-                        parsed["model_info"] = f"o3, {st.session_state.reasoning_effort}"
-                    else:
-                        parsed["model_info"] = "4.1"
+                    parsed["model_info"] = f"o3, {config.REASONING_EFFORT}"
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")
