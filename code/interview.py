@@ -34,12 +34,8 @@ if "start_time" not in st.session_state:
 
 
 if "selected_model" not in st.session_state:
-    if st.button("Start Interview"):
         st.session_state.selected_model = config.MODEL
         st.session_state.reasoning_effort = config.REASONING_EFFORT
-    else:
-        st.stop()
-
 
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
