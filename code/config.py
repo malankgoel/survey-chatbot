@@ -91,7 +91,7 @@ MODEL = "gpt-5-2025-08-07"
 TEMPERATURE = None  # (None for default value)
 MAX_OUTPUT_TOKENS = 7000
 
-REASONING_EFFORT = "low"
+REASONING_EFFORT = "minimal"
 
 HIDE_MOBILE_BUTTONS_CSS = """
 <style>
