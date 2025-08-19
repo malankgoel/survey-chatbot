@@ -33,7 +33,7 @@ if "start_time" not in st.session_state:
 #st.markdown(config.HIDE_MOBILE_BUTTONS_CSS, unsafe_allow_html=True)
 
 st.session_state.setdefault("is_streaming", False)
-st.session_state.setdefault("last_send_ns", 0)  # optional de-dupe hook
+st.session_state.setdefault("last_send_ns", 0)
 st.session_state.setdefault("pending_user", None)
 
 
@@ -103,18 +103,8 @@ if not st.session_state.messages:
 
 # Main chat if interview is active
 if st.session_state.interview_active:
-    # 1) Capture and queue, then rerun so input is disabled immediately
-    msg = st.chat_input(
-        "Your message here",
-        disabled=st.session_state.is_streaming or not st.session_state.interview_active
-    )
-    if msg:
-        st.session_state.pending_user = msg
-        st.session_state.last_send_ns = time.time_ns()
-        st.session_state.is_streaming = True
-        st.rerun()  # disables the input before streaming starts
 
-    # 2) If there’s a queued message, process it now
+    # 1) If there’s a queued message, process it FIRST (so input will render after streaming)
     if st.session_state.pending_user is not None:
         message_respondent = st.session_state.pending_user
         st.session_state.pending_user = None
@@ -137,8 +127,9 @@ if st.session_state.interview_active:
             message_interviewer = ""
             next_step = st.session_state.interaction_step + 1
 
+            st.session_state.is_streaming = True
             try:
-                api_kwargs["messages"] = st.session_state.messages
+                api_kwargs["messages"] = st.session_state.messages  # freshest messages
                 stream = client.chat.completions.create(**api_kwargs)
                 for chunk in stream:
                     delta = chunk.choices[0].delta.content or ""
@@ -174,8 +165,22 @@ if st.session_state.interview_active:
                     st.error("Unexpected format; interview not saved.")
                     st.write("DEBUG RAW OUTPUT:", message_interviewer)
                 st.session_state.interview_active = False
-                st.stop()  # optional: end this run cleanly
+                st.stop()  # end this run cleanly
 
             # save assistant message & increment step
             st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
             st.session_state.interaction_step = next_step
+
+        # IMPORTANT: rerun so the input re-renders *after* streaming, now enabled
+        st.rerun()
+
+    # 2) Render the input AFTER handling any pending message
+    msg = st.chat_input(
+        "Your message here",
+        disabled=st.session_state.is_streaming or not st.session_state.interview_active
+    )
+    if msg:
+        st.session_state.pending_user = msg
+        st.session_state.last_send_ns = time.time_ns()
+        st.session_state.is_streaming = True   # disable immediately on next run
+        st.rerun()
