@@ -34,6 +34,8 @@ if "start_time" not in st.session_state:
 
 st.session_state.setdefault("is_streaming", False)
 st.session_state.setdefault("last_send_ns", 0)  # optional de-dupe hook
+st.session_state.setdefault("pending_user", None)
+
 
 if "selected_model" not in st.session_state:
         st.session_state.selected_model = config.MODEL
@@ -101,12 +103,22 @@ if not st.session_state.messages:
 
 # Main chat if interview is active
 if st.session_state.interview_active:
-    message_respondent = st.chat_input(
-    "Your message here",
-    disabled=st.session_state.is_streaming or not st.session_state.interview_active
-)
-    if message_respondent:
+    # 1) Capture and queue, then rerun so input is disabled immediately
+    msg = st.chat_input(
+        "Your message here",
+        disabled=st.session_state.is_streaming or not st.session_state.interview_active
+    )
+    if msg:
+        st.session_state.pending_user = msg
         st.session_state.last_send_ns = time.time_ns()
+        st.session_state.is_streaming = True
+        st.rerun()  # disables the input before streaming starts
+
+    # 2) If there’s a queued message, process it now
+    if st.session_state.pending_user is not None:
+        message_respondent = st.session_state.pending_user
+        st.session_state.pending_user = None
+
         # extract patient_id if missing
         if not st.session_state.patient_id:
             m = re.search(r"PID:\s*(\d+)", message_respondent)
@@ -125,9 +137,7 @@ if st.session_state.interview_active:
             message_interviewer = ""
             next_step = st.session_state.interaction_step + 1
 
-            st.session_state.is_streaming = True
             try:
-                # ensure latest message list right before the call
                 api_kwargs["messages"] = st.session_state.messages
                 stream = client.chat.completions.create(**api_kwargs)
                 for chunk in stream:
@@ -146,17 +156,15 @@ if st.session_state.interview_active:
             finally:
                 st.session_state.is_streaming = False
 
-
             # after streaming completes:
             if next_step < 7:
                 pass
             else:
-                # Step 7: hide JSON, submit, then stop so input vanishes
                 message_placeholder.empty()
                 try:
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
-                    parsed["model_info"] = f"{config.MODEL}, {config.REASONING_EFFORT}"
+                    parsed["model_info"] = f"{st.session_state.selected_model}, {config.REASONING_EFFORT}"
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")
@@ -166,7 +174,7 @@ if st.session_state.interview_active:
                     st.error("Unexpected format; interview not saved.")
                     st.write("DEBUG RAW OUTPUT:", message_interviewer)
                 st.session_state.interview_active = False
-                st.stop()
+                st.stop()  # optional: end this run cleanly
 
             # save assistant message & increment step
             st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
