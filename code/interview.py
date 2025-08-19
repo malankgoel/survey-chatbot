@@ -1,3 +1,5 @@
+Changes
+
 import streamlit as st
 import time
 import config
@@ -32,6 +34,8 @@ if "start_time" not in st.session_state:
 
 #st.markdown(config.HIDE_MOBILE_BUTTONS_CSS, unsafe_allow_html=True)
 
+st.session_state.setdefault("is_streaming", False)
+st.session_state.setdefault("last_send_ns", 0)  # optional de-dupe hook
 
 if "selected_model" not in st.session_state:
         st.session_state.selected_model = config.MODEL
@@ -43,8 +47,9 @@ if "patient_id" not in st.session_state:
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
 with col2:
+    end_disabled = st.session_state.is_streaming
     if st.session_state.interview_active and st.button(
-        "End", help="End the interview."):
+        "End", help="End the interview.", disabled=end_disabled):
         st.session_state.interview_active = False
         quit_message = (
             "You have ended the interview.\n"
@@ -80,16 +85,30 @@ if not st.session_state.messages:
     # add system prompt
     st.session_state.messages.append({"role": "system", "content": config.SYSTEM_PROMPT})
     with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
-        # stream first question
-        stream = client.chat.completions.create(**api_kwargs)
-        message_interviewer = st.write_stream(stream)
+        st.session_state.is_streaming = True
+        try:
+            api_kwargs["messages"] = st.session_state.messages
+            stream = client.chat.completions.create(**api_kwargs)
+            message_interviewer = st.write_stream(stream)
+        except Exception:
+            st.info("Connection hiccup — refreshing…")
+            st.session_state.is_streaming = False
+            st.rerun()
+        finally:
+            st.session_state.is_streaming = False
+
     st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
     # count as first interaction
     st.session_state.interaction_step = 1
 
 # Main chat if interview is active
 if st.session_state.interview_active:
-    if message_respondent := st.chat_input("Your message here"):
+    message_respondent = st.chat_input(
+    "Your message here",
+    disabled=st.session_state.is_streaming or not st.session_state.interview_active
+)
+    if message_respondent:
+        st.session_state.last_send_ns = time.time_ns()
         # extract patient_id if missing
         if not st.session_state.patient_id:
             m = re.search(r"PID:\s*(\d+)", message_respondent)
@@ -108,20 +127,27 @@ if st.session_state.interview_active:
             message_interviewer = ""
             next_step = st.session_state.interaction_step + 1
 
-            # stream content but only display for steps 1–6
-            # stream the model’s reply
-            stream = client.chat.completions.create(**api_kwargs)
-            for chunk in stream:
-                delta = chunk.choices[0].delta.content or ""
-                message_interviewer += delta
-                # only render text + definitions for steps 1–6
-                if next_step < 7:
-                    # annotate each technical term inline, e.g. "foo (definition of foo)"
-                    annotated = message_interviewer
-                    for term, definition in LEXICON.items():
-                        pattern = re.compile(rf'\b{re.escape(term)}\b', flags=re.IGNORECASE)
-                        annotated = pattern.sub(lambda m: f"{m.group(0)} ({definition})", annotated)
-                    message_placeholder.markdown(annotated)
+            st.session_state.is_streaming = True
+            try:
+                # ensure latest message list right before the call
+                api_kwargs["messages"] = st.session_state.messages
+                stream = client.chat.completions.create(**api_kwargs)
+                for chunk in stream:
+                    delta = chunk.choices[0].delta.content or ""
+                    message_interviewer += delta
+                    if next_step < 7:
+                        annotated = message_interviewer
+                        for term, definition in LEXICON.items():
+                            pattern = re.compile(rf'\b{re.escape(term)}\b', flags=re.IGNORECASE)
+                            annotated = pattern.sub(lambda m: f"{m.group(0)} ({definition})", annotated)
+                        message_placeholder.markdown(annotated)
+            except Exception:
+                st.info("Connection hiccup — refreshing…")
+                st.session_state.is_streaming = False
+                st.rerun()
+            finally:
+                st.session_state.is_streaming = False
+
 
             # after streaming completes:
             if next_step < 7:
@@ -132,7 +158,7 @@ if st.session_state.interview_active:
                 try:
                     clean = message_interviewer.strip()
                     parsed = json.loads(clean)
-                    parsed["model_info"] = f"o3, {config.REASONING_EFFORT}"
+                    parsed["model_info"] = f"{config.MODEL}, {config.REASONING_EFFORT}"
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
                         st.success("Interview saved! Reload to start a new patient.")
@@ -142,6 +168,7 @@ if st.session_state.interview_active:
                     st.error("Unexpected format; interview not saved.")
                     st.write("DEBUG RAW OUTPUT:", message_interviewer)
                 st.session_state.interview_active = False
+                st.stop()
 
             # save assistant message & increment step
             st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
