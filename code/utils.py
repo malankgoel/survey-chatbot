@@ -145,14 +145,12 @@ def submit_to_google_form(parsed, patient_id):
         FIELD_IDS["patient_id"]:      patient_id,
     }
 
-    # QA pairs (1–6)
     for i, qa in enumerate(parsed.get("qa_pairs", []), start=1):
         qk = FIELD_IDS.get(f"q{i}")
         ak = FIELD_IDS.get(f"a{i}")
         if qk: form_data[qk] = qa.get("question", "")
         if ak: form_data[ak] = qa.get("answer", "")
 
-    # Diagnoses (1–5)
     for i, diag in enumerate(parsed.get("diagnoses", []), start=1):
         nk = FIELD_IDS.get(f"d{i}_name")
         pk = FIELD_IDS.get(f"d{i}_prob")
@@ -163,7 +161,6 @@ def submit_to_google_form(parsed, patient_id):
         if rk: form_data[rk] = diag.get("reasoning", "")
         if sk: form_data[sk] = "; ".join(diag.get("sources", []))
 
-    # Summary
     form_data[FIELD_IDS["summary"]] = parsed.get("summary", "")
     form_data[FIELD_IDS["model_info"]] = parsed.get("model_info", "")
 

@@ -81,14 +81,11 @@ Final JSON must include exactly "qa_pairs", "diagnoses" (≤5), "sources",
   "summary"—any deviation will break downstream parsing.
 """
 
-
-# System prompt
 SYSTEM_PROMPT = f"""{Prompt}
 """
 
-
 MODEL = "gpt-5-2025-08-07"
-TEMPERATURE = None  # (None for default value)
+TEMPERATURE = None
 MAX_OUTPUT_TOKENS = 7000
 
 REASONING_EFFORT = "low"
@@ -112,6 +109,6 @@ a[href*="streamlit.io"] { display:none !important; }
 </style>
 """
 
-# Avatars displayed in the chat interface
+# Avatars
 AVATAR_INTERVIEWER = "\U0001F393"
 AVATAR_RESPONDENT = "\U0001f464"
