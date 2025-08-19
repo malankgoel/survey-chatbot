@@ -47,7 +47,7 @@ if "patient_id" not in st.session_state:
 # Add 'Quit' button to dashboard
 col1, col2 = st.columns([0.85, 0.15])
 with col2:
-    end_disabled = st.session_state.is_streaming
+    end_disabled = st.session_state.is_streaming or (st.session_state.pending_user is not None)
     if st.session_state.interview_active and st.button(
         "End", help="End the interview.", disabled=end_disabled):
         st.session_state.interview_active = False
@@ -175,12 +175,27 @@ if st.session_state.interview_active:
         st.rerun()
 
     # 2) Render the input AFTER handling any pending message
+    chat_locked = (
+        st.session_state.is_streaming
+        or (st.session_state.pending_user is not None)
+        or (not st.session_state.interview_active)
+    )
+
+    # Force a hard remount whenever lock state flips (prevents a stale, typeable input)
+    chat_key = "chat_input_locked" if chat_locked else "chat_input_ready"
+
     msg = st.chat_input(
         "Your message here",
-        disabled=st.session_state.is_streaming or not st.session_state.interview_active
+        disabled=chat_locked,
+        key=chat_key,
     )
     if msg:
+        # If a message is already queued or streaming, ignore this extra submit
+        if (st.session_state.pending_user is not None) or st.session_state.is_streaming:
+            st.rerun()
+
+        # Queue the message and hard-lock the UI for the next run
         st.session_state.pending_user = msg
         st.session_state.last_send_ns = time.time_ns()
-        st.session_state.is_streaming = True   # disable immediately on next run
+        st.session_state.is_streaming = True
         st.rerun()
