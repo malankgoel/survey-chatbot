@@ -18,8 +18,8 @@ Follow-up Questions:
   5 questions (keep a running count) after the opening prompt, you MUST ask the 
   next question instead of producing the JSON. Make sure to ask exactly 5 
   questions after the initial prompt.Avoid repeating or rephrasing earlier questions.
-  Make sure the questions don't have 2/3 questions combined into one, and are easier 
-  to work with.
+  Make sure the questions only ask one thing at a time and don't expect 2/3 
+  different answers.
 
 Only once those questions are done, produce JSON:
 Diagnosis & JSON Output
