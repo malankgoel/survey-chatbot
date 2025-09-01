@@ -13,6 +13,30 @@ st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
 
+if "disclaimer_accepted" not in st.session_state:
+    st.session_state.disclaimer_accepted = False
+
+# --- Disclaimer Gate ---
+if not st.session_state.disclaimer_accepted:
+    st.header("Before you proceed")
+    st.markdown(config.DISCLAIMER_MD)
+
+    c1, c2 = st.columns([1, 1])
+    agree = c1.button("I agree", type="primary")
+    disagree = c2.button("I do not agree")
+
+    if agree:
+        st.session_state.disclaimer_accepted = True
+        st.rerun()  # start the app flow normally
+    elif disagree:
+        st.info("You can close this page or refresh if you change your mind.")
+        st.stop()   # do not render the rest of the app
+
+    # If neither button pressed yet, halt rendering of the rest of the page
+    st.stop()
+# --- End Disclaimer Gate ---
+
+
 if "interaction_step" not in st.session_state:
     st.session_state.interaction_step = 0
 
@@ -34,10 +58,12 @@ if "selected_model" not in st.session_state:
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
-for message in st.session_state.messages[1:]:
-    avatar = config.AVATAR_INTERVIEWER if message["role"] == "assistant" else config.AVATAR_RESPONDENT
-    with st.chat_message(message["role"], avatar=avatar):
-        st.markdown(message["content"])
+if st.session_state.disclaimer_accepted:
+    for message in st.session_state.messages[1:]:
+        avatar = config.AVATAR_INTERVIEWER if message["role"] == "assistant" else config.AVATAR_RESPONDENT
+        with st.chat_message(message["role"], avatar=avatar):
+            st.markdown(message["content"])
+
 
 # Load API client
 if api == "openai":
@@ -56,7 +82,7 @@ api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
 
 
 # Initial system prompt & first interviewer message
-if not st.session_state.messages:
+if st.session_state.disclaimer_accepted and not st.session_state.messages:
     st.session_state.messages.append({"role": "system", "content": config.SYSTEM_PROMPT})
     with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
         stream = client.chat.completions.create(**api_kwargs)
@@ -64,8 +90,9 @@ if not st.session_state.messages:
     st.session_state.messages.append({"role": "assistant", "content": message_interviewer})
     st.session_state.interaction_step = 1
 
+
 # Main chat
-if st.session_state.interview_active:
+if st.session_state.disclaimer_accepted and st.session_state.interview_active:
     if message_respondent := st.chat_input("Your message here"):
         if not st.session_state.patient_id:
             m = re.search(r"PID:\s*(\d+)", message_respondent)

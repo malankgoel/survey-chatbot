@@ -82,6 +82,19 @@ Final JSON must include exactly "qa_pairs", "diagnoses" (≤5), "sources",
   "summary"—any deviation will break downstream parsing.
 """
 
+DISCLAIMER_MD = """Enumerator please read aloud to the patient before starting the interview:
+
+Hello! With your permission, I will ask you some health questions using a digital tool. 
+
+This tool uses artificial intelligence (AI) to organize your symptoms and ask further questions based on it, but it does NOT replace a doctor or nurse.
+
+We will record your answers so the tool can work and results will be used for research. We will keep your information as private as possible and use secure systems, but all digital tools carry a small risk that information could be seen by others.
+
+The results are for research purposes only. If you have severe symptoms—such as trouble breathing, heavy bleeding, chest pain, fainting, or if you feel in immediate danger—please seek emergency care right away.
+
+There is no payment and you can withdraw at any time without penalty.
+"""
+
 SYSTEM_PROMPT = f"""{Prompt}
 """
 
