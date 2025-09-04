@@ -49,7 +49,7 @@ if "selected_model" not in st.session_state:
 if "patient_id" not in st.session_state:
     st.session_state.patient_id = ""
 
-if st.session_state.disclaimer_accepted:
+if st.session_state.start:
     for message in st.session_state.messages[1:]:
         avatar = config.AVATAR_INTERVIEWER if message["role"] == "assistant" else config.AVATAR_RESPONDENT
         with st.chat_message(message["role"], avatar=avatar):
@@ -73,7 +73,7 @@ api_kwargs["reasoning_effort"] = config.REASONING_EFFORT
 
 
 # Initial system prompt & first interviewer message
-if st.session_state.disclaimer_accepted and not st.session_state.messages:
+if st.session_state.start and not st.session_state.messages:
     st.session_state.messages.append({"role": "system", "content": config.SYSTEM_PROMPT})
     with st.chat_message("assistant", avatar=config.AVATAR_INTERVIEWER):
         stream = client.chat.completions.create(**api_kwargs)
@@ -83,7 +83,7 @@ if st.session_state.disclaimer_accepted and not st.session_state.messages:
 
 
 # Main chat
-if st.session_state.disclaimer_accepted and st.session_state.interview_active:
+if st.session_state.start and st.session_state.interview_active:
     if message_respondent := st.chat_input("Your message here"):
         if not st.session_state.patient_id:
             m = re.search(r"PID:\s*(\d+)", message_respondent)
