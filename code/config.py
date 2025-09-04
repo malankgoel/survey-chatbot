@@ -83,8 +83,6 @@ Final JSON must include exactly "qa_pairs", "diagnoses" (≤5), "sources",
   "summary"—any deviation will break downstream parsing.
 """
 
-Starting_Text = """Please click Start to begin the interview."""
-
 SYSTEM_PROMPT = f"""{Prompt}
 """
 

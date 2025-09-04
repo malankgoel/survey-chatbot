@@ -18,9 +18,7 @@ if "start" not in st.session_state:
 
 
 if not st.session_state.start:
-    st.header("Before you proceed")
-    st.markdown(config.Starting_Text)
-
+    st.header("Please click Start to begin the interview.")
     c1, c2 = st.columns([1, 1])
     agree = c1.button("Start", type="primary")
 
