@@ -13,28 +13,21 @@ st.set_page_config(page_title="Interview", page_icon=config.AVATAR_INTERVIEWER)
 if "interview_active" not in st.session_state:
     st.session_state.interview_active = True
 
-if "disclaimer_accepted" not in st.session_state:
-    st.session_state.disclaimer_accepted = False
+if "start" not in st.session_state:
+    st.session_state.start = False
 
-# --- Disclaimer Gate ---
-if not st.session_state.disclaimer_accepted:
+
+if not st.session_state.start:
     st.header("Before you proceed")
-    st.markdown(config.DISCLAIMER_MD)
+    st.markdown(config.Starting_Text)
 
     c1, c2 = st.columns([1, 1])
-    agree = c1.button("I agree", type="primary")
-    disagree = c2.button("I do not agree")
+    agree = c1.button("Start", type="primary")
 
     if agree:
-        st.session_state.disclaimer_accepted = True
-        st.rerun()  # start the app flow normally
-    elif disagree:
-        st.info("You can close this page or refresh if you change your mind.")
-        st.stop()   # do not render the rest of the app
-
-    # If neither button pressed yet, halt rendering of the rest of the page
+        st.session_state.start = True
+        st.rerun()
     st.stop()
-# --- End Disclaimer Gate ---
 
 
 if "interaction_step" not in st.session_state:
@@ -130,11 +123,11 @@ if st.session_state.disclaimer_accepted and st.session_state.interview_active:
                     parsed["model_info"] = f"5, {config.REASONING_EFFORT}"
                     resp = submit_to_google_form(parsed, st.session_state.patient_id)
                     if resp.status_code == 200:
-                        st.success("Interview saved! Reload to start a new patient.")
+                        st.success("Interview saved! Return to SurveryCTO.")
                     else:
                         st.error(f"Failed to save data (status {resp.status_code}).")
                 except json.JSONDecodeError:
-                    st.error("Unexpected format; interview not saved.")
+                    st.error("Unexpected format; interview not saved. Please take a screenshot.")
                     st.write("DEBUG RAW OUTPUT:", message_interviewer)
                 st.session_state.interview_active = False
 
